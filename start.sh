@@ -12,7 +12,7 @@ nohup filebrowser -r /  -p 9184 >> /dev/null 2>&1 &
 mkdir /.config/
 mkdir /.config/rclone
 mkdir /root/.config/rclone
-#touch /.config/rclone/rclone.conf
+touch /.config/rclone/rclone.conf
 
 wget git.io/tracker.sh
 chmod 0777 /tracker.sh
@@ -24,7 +24,7 @@ chmod 0777 /bot-arpt
 mkdir /bot/
 chmod 0777 /bot
 mv /bot-arpt/bot/* /bot/
-mv /bot-arpt/bot/rclone.conf /root/.config/rclone
+mv /bot-arpt/bot/rclone.conf /root/.config/rclone/
 
 rm /etc/nginx/nginx.conf
 cp /bot-arpt/root/nginx.conf /etc/nginx/
