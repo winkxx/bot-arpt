@@ -11,6 +11,7 @@ nohup filebrowser -r /  -p 9184 >> /dev/null 2>&1 &
 
 mkdir /.config/
 mkdir /.config/rclone
+mkdir /root/.config/rclone
 #touch /.config/rclone/rclone.conf
 
 wget git.io/tracker.sh
@@ -21,7 +22,7 @@ rm -rf /bot
 git clone https://github.com/winkxx/bot-arpt.git
 mkdir /bot/
 mv /bot-arpt/bot/* /bot/
-mv /bot-arpt/bot/rclone.conf /.config/rclone
+mv /bot-arpt/bot/rclone.conf /root/.config/rclone
 
 rm /etc/nginx/nginx.conf
 cp /bot-arpt/root/nginx.conf /etc/nginx/
