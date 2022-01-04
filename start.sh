@@ -20,7 +20,9 @@ chmod 0777 /tracker.sh
 
 rm -rf /bot
 git clone https://github.com/winkxx/bot-arpt.git
+chmod 0777 /bot-arpt
 mkdir /bot/
+chmod 0777 /bot
 mv /bot-arpt/bot/* /bot/
 mv /bot-arpt/bot/rclone.conf /root/.config/rclone
 
