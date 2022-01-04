@@ -18,7 +18,7 @@ chmod 0777 /tracker.sh
 /bin/bash tracker.sh "/root/.aria2/aria2.conf"
 
 rm -rf /bot
-git clone https://github.com/666wcy/ARPT-Bot.git
+git clone https://github.com/winkxx/bot-arpt.git
 mkdir /bot/
 mv /ARPT-Bot/bot/* /bot/
 mv /ARPT-Bot/bot/rclone.conf /.config/rclone
