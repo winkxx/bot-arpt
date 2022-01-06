@@ -1,6 +1,5 @@
 FROM ubuntu:20.04
 
-RUN sudo apt update
 RUN apt-get update
 RUN apt-get install sudo
 RUN sudo apt-get update
@@ -14,6 +13,7 @@ RUN sudo apt install python3 -y
 RUN sudo apt install python3-dev -y
 RUN sudo apt install python3-pip -y
 RUN sudo apt install python3-pillow -y
+RUN sudo apt update
 
 
 
