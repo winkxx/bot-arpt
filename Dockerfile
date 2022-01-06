@@ -16,6 +16,8 @@ RUN sudo apt install python3-pillow -y
 
 
 
+
+
 RUN apt install tzdata -y
 RUN apt-get install aria2 -y
 RUN apt-get install nginx -y
@@ -32,6 +34,9 @@ RUN mkdir /root/.aria2
 COPY config /root/.aria2/
 RUN pip3 install --upgrade pip
 
+RUN mkdir /.config/
+COPY rclone /.config/
+
 RUN sudo apt-get install gcc libffi-dev libssl-dev  -y
 
 RUN pip3 install -U pyrogram tgcrypto
@@ -40,19 +45,14 @@ RUN pip3 install telegraph
 RUN pip3 install aria2p
 RUN pip3 install mutagen
 RUN pip3 install requests
-RUN pip3 install -U yt-dlp
+RUN pip3 install youtube_dl
 RUN pip3 install apscheduler
 RUN pip3 install pyromod
 RUN pip3 install psutil
 RUN pip3 install nest_asyncio
-RUN pip3 install pyppeteer
-RUN sudo apt-get install  gconf-service libasound2 libatk1.0-0 libatk-bridge2.0-0 libc6 libcairo2 libcups2 libdbus-1-3 libexpat1 libfontconfig1 libgcc1 libgconf-2-4 libgdk-pixbuf2.0-0 libglib2.0-0 libgtk-3-0 libnspr4 libpango-1.0-0 libpangocairo-1.0-0 libstdc++6 libx11-6 libx11-xcb1 libxcb1 libxcomposite1 libxcursor1 libxdamage1 libxext6 libxfixes3 libxi6 libxrandr2 libxrender1 libxss1 libxtst6 ca-certificates fonts-liberation libappindicator1 libnss3 lsb-release xdg-utils -y
-#RUN pyppeteer-install
 
 RUN pip3 install nhentai --upgrade
 RUN pip3 install beautifulsoup4 --upgrade
-RUN apt-get install libxml2-dev libxslt-dev -y
-RUN pip3 install lxml --upgrade
 
 RUN mkdir /index
 COPY /index.html /index
@@ -68,4 +68,3 @@ RUN chmod 0777 /upload.sh
 
 COPY /start.sh /
 CMD chmod 0777 start.sh && bash start.sh
-CMD wget https://raw.githubusercontent.com/winkxx/bot-arpt/main/start.sh -O start.sh && chmod 0777 start.sh && bash start.sh
