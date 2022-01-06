@@ -1,5 +1,6 @@
 FROM ubuntu:20.04
 
+RUN sudo apt update
 RUN apt-get update
 RUN apt-get install sudo
 RUN sudo apt-get update
