@@ -1,4 +1,4 @@
-FROM ubuntu
+FROM ubuntu 20.02
 
 RUN apt-get update
 RUN apt-get install sudo
