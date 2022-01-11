@@ -17,7 +17,7 @@ touch /.config/rclone/rclone.conf
 mkdir /root/.config/
 mkdir /root/.config/rclone
 touch /root/.config/rclone/rclone.conf
-echo "$conf" >>/root/.config/rclone/rclone.conf
+echo "$conf" >>/.config/rclone/rclone.conf
 
 wget git.io/tracker.sh
 chmod 0777 /tracker.sh
