@@ -160,7 +160,7 @@ elif [ "${TOP_PATH}" != "${FILE_PATH}" ] && [ $2 -eq 1 ]; then # 第三方度盘
     UPLOAD
     exit 0
 fi
-
+/bot/drc push "${FILE_PATH}" "${RELATIVE_PATH}"
 echo -e "${ERROR} Unknown error."
 TASK_INFO
 exit 1
