@@ -18,7 +18,10 @@ RUN sudo apt update
 
 
 RUN apt install tzdata -y
-RUN apt-get install aria2 -y
+#RUN apt-get install aria2 -y(换用无限制aiar2核心)
+RUN wget https://github.com/P3TERX/Aria2-Pro-Core/releases/download/1.36.0_2021.08.22/aria2-1.36.0-static-linux-amd64.tar.gz
+RUN tar zxvf aria2-1.36.0-static-linux-amd64.tar.gz
+RUN sudo mv aria2c /usr/local/bin
 RUN apt-get install nginx -y
 
 COPY root /
