@@ -18,7 +18,6 @@ RUN sudo apt update
 
 
 RUN apt install tzdata -y
-#RUN apt-get install aria2 -y(换用无限制aiar2核心)
 
 RUN apt-get install nginx -y
 
@@ -39,7 +38,6 @@ RUN sudo apt-get install gcc libffi-dev libssl-dev  -y
 RUN pip3 install -U pyrogram tgcrypto
 #RUN pip3 install pillow
 RUN pip3 install telegraph
-RUN pip3 install aria2p
 RUN pip3 install mutagen
 RUN pip3 install requests
 RUN pip3 install apscheduler
