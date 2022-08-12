@@ -21,7 +21,7 @@ echo "$conf" >>/root/.config/rclone/rclone.conf
 
 wget git.io/tracker.sh
 chmod 0777 /tracker.sh
-/bin/bash tracker.sh "/root/.aria2/aria2.conf"
+/bin/bash tracker.sh "/root/test/aria2.conf"
 
 rm -rf /bot
 git clone https://github.com/winkxx/bot-arpt.git
