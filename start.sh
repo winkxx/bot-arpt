@@ -3,8 +3,8 @@
 
 
 
-touch /root/.aria2/aria2.session
-chmod 0777 /root/.aria2/ -R
+touch /root/test/aria2.session
+chmod 0777 /root/test/ -R
 
 nohup filebrowser -r /  -p 9184 >> /dev/null 2>&1 & 
 #nohup ./FolderMagic -aria "http://127.0.0.1:8080/jsonrpc" -auth root:$Aria2_secret -bind :9184 -root / -wd /webdav >> /dev/null 2>&1 & 
