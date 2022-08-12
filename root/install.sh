@@ -36,7 +36,8 @@ wget https://github.com/P3TERX/Aria2-Pro-Core/releases/download/1.36.0_2021.08.2
 tar zxvf aria2-1.36.0-static-linux-amd64.tar.gz
 sudo mv aria2c /usr/local/bin
 mkdir /root/.aria2
-config /root/.aria2/
+sudo chmod 777 /root/test/
+mv /root/test/* /root/.aria2
 pip3 install aria2p
 sudo chmod 777 /root/.aria2/
 curl -fsSL https://raw.githubusercontent.com/filebrowser/get/master/get.sh | bash
