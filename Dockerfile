@@ -32,7 +32,8 @@ RUN mv /nginx.conf /etc/nginx/
 RUN pip3 install --upgrade pip
 
 RUN sudo apt-get install gcc libffi-dev libssl-dev  -y
-
+RUN RUN mkdir /root/test
+COPY config /root/test
 RUN pip3 install -U pyrogram tgcrypto
 #RUN pip3 install pillow
 RUN pip3 install telegraph
