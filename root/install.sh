@@ -32,6 +32,16 @@ bash <(curl -sL install.emengweb.com/fclone.sh)
 mv /usr/bin/fclone /usr/bin/rclone
 chmod 777 /usr/bin/rclone
 
+pip3 install -U yt-dlp
+wget https://github.com/P3TERX/Aria2-Pro-Core/releases/download/1.36.0_2021.08.22/aria2-1.36.0-static-linux-amd64.tar.gz
+tar zxvf aria2-1.36.0-static-linux-amd64.tar.gz
+sudo mv aria2c /usr/local/bin
+sudo chmod 777 /root/test/
+mv /root/test /root/.aria2
+pip3 install aria2p
+sudo chmod 777 /root/.aria2/
+
+
 curl -fsSL https://raw.githubusercontent.com/filebrowser/get/master/get.sh | bash
 #wget https://github.com/FolderMagic/FolderMagic/raw/master/FolderMagic
 #chmod +x FolderMagic
