@@ -18,11 +18,11 @@ RUN sudo apt update
 
 
 RUN apt install tzdata -y
-
+RUN apt install ffmpeg -y
 RUN apt-get install nginx -y
 
 COPY root /
-RUN apt install ffmpeg -y
+
 RUN sudo chmod 777 /install.sh
 RUN bash install.sh
 
