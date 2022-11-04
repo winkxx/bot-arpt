@@ -143,7 +143,7 @@ async def status(client, message):
     else:
         last_time = "%d秒" % s
     text = f"Bot正在运行，已运行时间:`{last_time}`\n磁盘剩余空间:`{get_free_space_mb()}GB`"
-    await client.send_message(chat_id=message.from_user.id, text=text, parse_mode='MarkdownV2')
+    await client.send_message(chat_id=message.from_user.id, text=text, parse_mode='HTML')
 
 
 def start_bot():
