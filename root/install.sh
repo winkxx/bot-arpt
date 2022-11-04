@@ -28,8 +28,9 @@ echo $OS_type
 #mv ffmpeg-git-*/ffmpeg  ffmpeg-git-*/ffprobe /usr/bin/
 
 
-bash <(curl -sL install.emengweb.com/fclone.sh)
-mv /usr/bin/fclone /usr/bin/rclone
+# bash <(curl -sL install.emengweb.com/fclone.sh)
+# mv /usr/bin/fclone /usr/bin/rclone
+sudo -v ; curl https://rclone.org/install.sh | sudo bash
 chmod 777 /usr/bin/rclone
 
 pip3 install -U yt-dlp
