@@ -12,7 +12,7 @@ def new_clock():
             if download.status=="active":
                 print(download.name, download.download_speed)
                 print("任务正在进行,保持唤醒")
-                print(requests.get(url=f"http://{App_title}.herokuapp.com/"))
+                print(requests.get(url=f"https://{App_title}-production.up.railway.app/"))
                 sys.stdout.flush()
                 break
         else:
@@ -30,7 +30,7 @@ def second_clock():
         #print(job_status)
         if "transferring" in job_status:
             print("rclone 正在上传")
-            print(requests.get(url=f"http://{App_title}.herokuapp.com/"))
+            print(requests.get(url=f"https://{App_title}-production.up.railway.app/"))
             sys.stdout.flush()
 
         else:
