@@ -40,7 +40,7 @@ nginx -c /etc/nginx/nginx.conf
 nginx -s reload
 
 nohup aria2c --conf-path=/root/test/aria2.conf --rpc-listen-port=8080 --rpc-secret=$Aria2_secret &
-nohup rclone rcd --rc-addr=127.0.0.1:5572 --rc-user=root --rc-pass=$Aria2_secret --rc-allow-origin="https://elonh.github.io" &
+nohup rclone rcd --rc-addr=0.0.0.0:5572 --rc-user=root --rc-pass=$Aria2_secret --rc-allow-origin="https://elonh.github.io" &
 #nohup python3 /bot/web.py &
 
 python3 /bot/main.py
