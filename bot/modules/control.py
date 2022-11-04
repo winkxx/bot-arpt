@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+
 from config import aria2, BOT_name,Rclone_share,Aria2_secret
 import sys
 from pyrogram.types import InlineKeyboardMarkup,InlineKeyboardButton
@@ -17,9 +18,11 @@ import requests
 from pyppeteer import launch
 import copy
 import nest_asyncio
+
 nest_asyncio.apply()
 os.system("df -lh")
 task=[]
+
 async def getpassword(iurl, password):
     global pheader, url
     browser = await launch(options={'args': ['--no-sandbox']})
@@ -29,6 +32,7 @@ async def getpassword(iurl, password):
     await page.keyboard.type(password)
     verityElem = await page.querySelector("input[id='btnSubmitPassword']")
     print("密码输入完成，正在跳转")
+
     await asyncio.gather(
         page.waitForNavigation(),
         verityElem.click(),
@@ -44,9 +48,13 @@ async def getpassword(iurl, password):
         pheader += coo
     await browser.close()
     return pheader,url
+
+
 async def downloadFiles(client,info,password,originalPath, req, layers, start=1, num=-1, _id=0):
     #sudo apt-get install  gconf-service libasound2 libatk1.0-0 libatk-bridge2.0-0 libc6 libcairo2 libcups2 libdbus-1-3 libexpat1 libfontconfig1 libgcc1 libgconf-2-4 libgdk-pixbuf2.0-0 libglib2.0-0 libgtk-3-0 libnspr4 libpango-1.0-0 libpangocairo-1.0-0 libstdc++6 libx11-6 libx11-xcb1 libxcb1 libxcomposite1 libxcursor1 libxdamage1 libxext6 libxfixes3 libxi6 libxrandr2 libxrender1 libxss1 libxtst6 ca-certificates fonts-liberation libappindicator1 libnss3 lsb-release xdg-utils wget -y
     #pyppeteer-install
+
+
     header = {
         'sec-ch-ua-mobile': '?0',
         'upgrade-insecure-requests': '1',
@@ -58,7 +66,9 @@ async def downloadFiles(client,info,password,originalPath, req, layers, start=1,
         'sec-fetch-mode': 'navigate',
         'sec-fetch-dest': 'iframe',
         'accept-language': 'zh-CN,zh;q=0.9,en;q=0.8,en-GB;q=0.7,en-US;q=0.6'
+
     }
+
     if password != "":
         print("正在启动无头浏览器模拟输入密码")
         text="正在启动无头浏览器模拟输入密码   "
@@ -69,24 +79,29 @@ async def downloadFiles(client,info,password,originalPath, req, layers, start=1,
         text = "无头浏览器关闭，正在获取文件列表"
         await client.edit_message_text(text=text, chat_id=info.chat.id, message_id=info.message_id,
                                        parse_mode='markdown')
+
         header['cookie'] = pheader
         print(password)
         print(pheader)
         originalPath=temp_url
         password=""
+
     if req == None:
         req = requests.session()
     # print(header)
+
     reqf = req.get(originalPath, headers=header)
     if "-my" not in originalPath:
         isSharepoint = True
         print("sharepoint 链接")
     else:
         isSharepoint = False
+
     # f=open()
     if ',"FirstRow"' not in reqf.text:
         print("\t" * layers, "这个文件夹没有文件")
         return 0
+
     filesData = []
     redirectURL = reqf.url
     redirectSplitURL = redirectURL.split("/")
@@ -95,6 +110,7 @@ async def downloadFiles(client,info,password,originalPath, req, layers, start=1,
     downloadURL = "/".join(redirectSplitURL[:-1]) + "/download.aspx?UniqueId="
     if isSharepoint:
         pat = re.search('templateUrl":"(.*?)"', reqf.text)
+
         downloadURL = pat.group(1)
         downloadURL = urllib.parse.urlparse(downloadURL)
         downloadURL = "{}://{}{}".format(downloadURL.scheme,
@@ -102,11 +118,14 @@ async def downloadFiles(client,info,password,originalPath, req, layers, start=1,
         downloadURL = "/".join(downloadURL[:-1]) + \
                       "/download.aspx?UniqueId="
         print(downloadURL)
+
     # print(reqf.headers)
+
     s2 = urllib.parse.urlparse(redirectURL)
     header["referer"] = redirectURL
     header["cookie"] = reqf.headers["set-cookie"]
     header["authority"] = s2.netloc
+
     headerStr = ""
     for key, value in header.items():
         # print(key+':'+str(value))
@@ -123,7 +142,10 @@ async def downloadFiles(client,info,password,originalPath, req, layers, start=1,
         "/", "%2F").replace("_", "%5F").replace("-", "%2D")
     rootFolderUrl = parse.quote(rootFolder).replace(
         "/", "%2F").replace("_", "%5F").replace("-", "%2D")
+
     graphqlVar = '{"query":"query (\n        $listServerRelativeUrl: String!,$renderListDataAsStreamParameters: RenderListDataAsStreamParameters!,$renderListDataAsStreamQueryString: String!\n        )\n      {\n      \n      legacy {\n      \n      renderListDataAsStream(\n      listServerRelativeUrl: $listServerRelativeUrl,\n      parameters: $renderListDataAsStreamParameters,\n      queryString: $renderListDataAsStreamQueryString\n      )\n    }\n      \n      \n  perf {\n    executionTime\n    overheadTime\n    parsingTime\n    queryCount\n    validationTime\n    resolvers {\n      name\n      queryCount\n      resolveTime\n      waitTime\n    }\n  }\n    }","variables":{"listServerRelativeUrl":"%s","renderListDataAsStreamParameters":{"renderOptions":5707527,"allowMultipleValueFilterForTaxonomyFields":true,"addRequiredFields":true,"folderServerRelativeUrl":"%s"},"renderListDataAsStreamQueryString":"@a1=\'%s\'&RootFolder=%s&TryNewExperienceSingle=TRUE"}}' % (relativeFolder, rootFolder, relativeUrl, rootFolderUrl)
+
+
     # print(graphqlVar)
     s2 = urllib.parse.urlparse(redirectURL)
     tempHeader = copy.deepcopy(header)
@@ -132,6 +154,7 @@ async def downloadFiles(client,info,password,originalPath, req, layers, start=1,
     tempHeader["authority"] = s2.netloc
     tempHeader["content-type"] = "application/json;odata=verbose"
     # print(redirectSplitURL)
+
     graphqlReq = req.post(
         "/".join(redirectSplitURL[:-3]) + "/_api/v2.1/graphql", data=graphqlVar.encode('utf-8'), headers=tempHeader)
     graphqlReq = json.loads(graphqlReq.text)
@@ -144,18 +167,22 @@ async def downloadFiles(client,info,password,originalPath, req, layers, start=1,
         filesData.extend(graphqlReq[
                              "data"]["legacy"]["renderListDataAsStream"]["ListData"]["Row"])
         # print(filesData)
+
         listViewXml = graphqlReq[
             "data"]["legacy"]["renderListDataAsStream"]["ViewMetadata"]["ListViewXml"]
         renderListDataAsStreamVar = '{"parameters":{"__metadata":{"type":"SP.RenderListDataParameters"},"RenderOptions":1216519,"ViewXml":"%s","AllowMultipleValueFilterForTaxonomyFields":true,"AddRequiredFields":true}}' % (
             listViewXml).replace('"', '\\"')
         # print(renderListDataAsStreamVar, nextHref,1)
+
         # print(listViewXml)
+
         graphqlReq = req.post(
             "/".join(
                 redirectSplitURL[:-3]) + "/_api/web/GetListUsingPath(DecodedUrl=@a1)/RenderListDataAsStream" + nextHref,
             data=renderListDataAsStreamVar.encode('utf-8'), headers=tempHeader)
         graphqlReq = json.loads(graphqlReq.text)
         # print(graphqlReq)
+
         while "NextHref" in graphqlReq["ListData"]:
             nextHref = graphqlReq["ListData"]["NextHref"] + "&@a1=%s&TryNewExperienceSingle=TRUE" % (
                     "%27" + relativeUrl + "%27")
@@ -171,6 +198,7 @@ async def downloadFiles(client,info,password,originalPath, req, layers, start=1,
     else:
         filesData = filesData.extend(graphqlReq[
                                          "data"]["legacy"]["renderListDataAsStream"]["ListData"]["Row"])
+
     fileCount = 0
     # print(headerStr)
     if filesData==None:
@@ -179,6 +207,7 @@ async def downloadFiles(client,info,password,originalPath, req, layers, start=1,
         filesData = json.loads(pat.group(1))
     for i in filesData:
         if i['FSObjType'] == "1":
+
             _query = query.copy()
             _query['id'] = os.path.join(
                 _query['id'], i['FileLeafRef']).replace("\\", "/")
@@ -188,19 +217,24 @@ async def downloadFiles(client,info,password,originalPath, req, layers, start=1,
             else:
                 originalPath = "/".join(redirectSplitURL[:-1]) + \
                                "/AllItems.aspx?" + urllib.parse.urlencode(_query)
+
+
             fileCount += await downloadFiles(client, info,password, originalPath, req, layers + 1, _id=fileCount, start=start,
                                              num=num)
         else:
             fileCount += 1
             if num == -1 or start <= fileCount + _id < start + num:
+
                 cc = downloadURL + (i["UniqueId"][1:-1].lower())
                 download_path = f"/root/Download{str(query['id']).split('Documents', 1)[1]}"
                 dd = dict(out=i["FileLeafRef"], header=headerStr, dir=download_path)
+
                 aria2Link = "http://localhost:8080/jsonrpc"
                 aria2Secret = os.environ.get('Aria2_secret')
                 jsonreq = json.dumps({'jsonrpc': '2.0', 'id': 'qwer',
                                       'method': 'aria2.addUri',
                                       "params": ["token:" + aria2Secret, [cc], dd]})
+
                 c = requests.post(aria2Link, data=jsonreq)
                 pprint(json.loads(c.text))
                 text = f"推送下载：`{i['FileLeafRef']}`\n下载路径:`{download_path}`\n推送结果:`{c.text}`"
@@ -210,8 +244,11 @@ async def downloadFiles(client,info,password,originalPath, req, layers, start=1,
                 except Exception as e:
                     print(f"修改信息失败:{e}")
                 time.sleep(0.5)
+
     return fileCount
+
 async def odshare_download(client, message):
+
     try:
         odshare_url=str(message.text).split(" ")[1]
         try:
@@ -225,29 +262,42 @@ async def odshare_download(client, message):
     except Exception as e:
         print(f"odshare error {e}")
         await client.send_message(chat_id=message.chat.id, text="抓取下载链接失败", parse_mode='markdown')
+
+
 async def login_of_share(client,info,link,admin,password):
     try:
+
         url = "http://portal.office.com/onedrive"
         # browser = await launch(headless=False,options={'args': ['--no-sandbox']})
         browser = await launch(options={'args': ['--no-sandbox']})
         page = await browser.newPage()
         print(admin,password)
+
         await page.goto(url, {'waitUntil': 'networkidle0'})
+
+
         await page.type("input[id='i0116']", admin)
         await client.edit_message_text(text=f"已输入账号", chat_id=info.chat.id,
                                        message_id=info.message_id,
                                        parse_mode='markdown')
+
         await page.click("#idSIButton9")
         await asyncio.sleep(3)
+
         await page.type("input[id='i0118']", password)
+
         print("密码输入完成，正在跳转")
+
+
         await page.click("#idSIButton9")
         await client.edit_message_text(text=f"密码输入完成，正在跳转", chat_id=info.chat.id,
                                        message_id=info.message_id,
                                        parse_mode='markdown')
         await asyncio.sleep(3)
+
         # await page.click("input[value='登录']")
         # await page.keyboard.press('Enter')
+
         await asyncio.wait([
             page.click("#idSIButton9"),
             page.waitForNavigation({'timeout': 50000}),
@@ -258,19 +308,27 @@ async def login_of_share(client,info,link,admin,password):
         await asyncio.sleep(5)
         while not await page.querySelector('.od-ItemContent-title'):
             pass
+
         url = await page.evaluate('window.location.href', force_expr=True)
         print(url)
+
         res = await page.goto(link, {'waitUntil': 'networkidle0'})
+
         url = await page.evaluate('window.location.href', force_expr=True)
         print(url)
+
         print("点击完成")
+
         print(res.request.headers)
+
         header = res.request.headers
+
         _cookie = await page.cookies()
         pheader = ""
         for __cookie in _cookie:
             coo = "{}={};".format(__cookie.get("name"), __cookie.get("value"))
             pheader += coo
+
         header['cookie'] = pheader
         reqf = requests.get(url, headers=header)
         print(reqf)
@@ -281,6 +339,8 @@ async def login_of_share(client,info,link,admin,password):
     except Exception as e:
         print(f"login_of_share {e}")
         await client.send_message(chat_id=info.chat.id, text=f"login_of_share {e}", parse_mode='markdown')
+
+
 async def odpriva_downloadFiles(client,info,admin,password,originalPath, req, layers, start=1, num=-1, _id=0):
     try:
         header={}
@@ -293,16 +353,19 @@ async def odpriva_downloadFiles(client,info,admin,password,originalPath, req, la
                                                parse_mode='markdown')
                 return
         # print(header)
+
         reqf = req.get(originalPath, headers=header)
         if "-my" not in originalPath:
             isSharepoint = True
             print("sharepoint 链接")
         else:
             isSharepoint = False
+
         # f=open()
         if ',"FirstRow"' not in reqf.text:
             print("\t" * layers, "这个文件夹没有文件")
             return 0
+
         filesData = []
         redirectURL = reqf.url
         redirectSplitURL = redirectURL.split("/")
@@ -311,17 +374,22 @@ async def odpriva_downloadFiles(client,info,admin,password,originalPath, req, la
         downloadURL = "/".join(redirectSplitURL[:-1]) + "/download.aspx?UniqueId="
         if isSharepoint:
             pat = re.search('templateUrl":"(.*?)"', reqf.text)
+
             downloadURL = pat.group(1)
             downloadURL = urllib.parse.urlparse(downloadURL)
             downloadURL = "{}://{}{}".format(downloadURL.scheme,
                                              downloadURL.netloc, downloadURL.path).split("/")
             downloadURL = "/".join(downloadURL[:-1]) + \
                           "/download.aspx?UniqueId="
+
+
         # print(reqf.headers)
+
         s2 = urllib.parse.urlparse(redirectURL)
         header["referer"] = redirectURL
         #header["cookie"] = reqf.headers["set-cookie"]
         header["authority"] = s2.netloc
+
         headerStr = ""
         for key, value in header.items():
             # print(key+':'+str(value))
@@ -338,8 +406,10 @@ async def odpriva_downloadFiles(client,info,admin,password,originalPath, req, la
             "/", "%2F").replace("_", "%5F").replace("-", "%2D")
         rootFolderUrl = parse.quote(rootFolder).replace(
             "/", "%2F").replace("_", "%5F").replace("-", "%2D")
+
         graphqlVar = '{"query":"query (\n        $listServerRelativeUrl: String!,$renderListDataAsStreamParameters: RenderListDataAsStreamParameters!,$renderListDataAsStreamQueryString: String!\n        )\n      {\n      \n      legacy {\n      \n      renderListDataAsStream(\n      listServerRelativeUrl: $listServerRelativeUrl,\n      parameters: $renderListDataAsStreamParameters,\n      queryString: $renderListDataAsStreamQueryString\n      )\n    }\n      \n      \n  perf {\n    executionTime\n    overheadTime\n    parsingTime\n    queryCount\n    validationTime\n    resolvers {\n      name\n      queryCount\n      resolveTime\n      waitTime\n    }\n  }\n    }","variables":{"listServerRelativeUrl":"%s","renderListDataAsStreamParameters":{"renderOptions":5707527,"allowMultipleValueFilterForTaxonomyFields":true,"addRequiredFields":true,"folderServerRelativeUrl":"%s"},"renderListDataAsStreamQueryString":"@a1=\'%s\'&RootFolder=%s&TryNewExperienceSingle=TRUE"}}' % (
         relativeFolder, rootFolder, relativeUrl, rootFolderUrl)
+
         # print(graphqlVar)
         s2 = urllib.parse.urlparse(redirectURL)
         tempHeader = copy.deepcopy(header)
@@ -348,6 +418,7 @@ async def odpriva_downloadFiles(client,info,admin,password,originalPath, req, la
         tempHeader["authority"] = s2.netloc
         tempHeader["content-type"] = "application/json;odata=verbose"
         # print(redirectSplitURL)
+
         graphqlReq = req.post(
             "/".join(redirectSplitURL[:-3]) + "/_api/v2.1/graphql", data=graphqlVar.encode('utf-8'), headers=tempHeader)
         graphqlReq = json.loads(graphqlReq.text)
@@ -360,18 +431,22 @@ async def odpriva_downloadFiles(client,info,admin,password,originalPath, req, la
             filesData.extend(graphqlReq[
                                  "data"]["legacy"]["renderListDataAsStream"]["ListData"]["Row"])
             # print(filesData)
+
             listViewXml = graphqlReq[
                 "data"]["legacy"]["renderListDataAsStream"]["ViewMetadata"]["ListViewXml"]
             renderListDataAsStreamVar = '{"parameters":{"__metadata":{"type":"SP.RenderListDataParameters"},"RenderOptions":1216519,"ViewXml":"%s","AllowMultipleValueFilterForTaxonomyFields":true,"AddRequiredFields":true}}' % (
                 listViewXml).replace('"', '\\"')
             # print(renderListDataAsStreamVar, nextHref,1)
+
             # print(listViewXml)
+
             graphqlReq = req.post(
                 "/".join(
                     redirectSplitURL[:-3]) + "/_api/web/GetListUsingPath(DecodedUrl=@a1)/RenderListDataAsStream" + nextHref,
                 data=renderListDataAsStreamVar.encode('utf-8'), headers=tempHeader)
             graphqlReq = json.loads(graphqlReq.text)
             # print(graphqlReq)
+
             while "NextHref" in graphqlReq["ListData"]:
                 nextHref = graphqlReq["ListData"]["NextHref"] + "&@a1=%s&TryNewExperienceSingle=TRUE" % (
                         "%27" + relativeUrl + "%27")
@@ -387,6 +462,7 @@ async def odpriva_downloadFiles(client,info,admin,password,originalPath, req, la
         else:
             filesData = filesData.extend(graphqlReq[
                                              "data"]["legacy"]["renderListDataAsStream"]["ListData"]["Row"])
+
         fileCount = 0
         # print(headerStr)
         if filesData == None:
@@ -395,6 +471,7 @@ async def odpriva_downloadFiles(client,info,admin,password,originalPath, req, la
             filesData = json.loads(pat.group(1))
         for i in filesData:
             if i['FSObjType'] == "1":
+
                 _query = query.copy()
                 _query['id'] = os.path.join(
                     _query['id'], i['FileLeafRef']).replace("\\", "/")
@@ -404,6 +481,7 @@ async def odpriva_downloadFiles(client,info,admin,password,originalPath, req, la
                 else:
                     originalPath = "/".join(redirectSplitURL[:-1]) + \
                                    "/AllItems.aspx?" + urllib.parse.urlencode(_query)
+
                 fileCount += await odpriva_downloadFiles(client, info,admin,password, originalPath, req, layers + 1, _id=fileCount, start=start,
                                                  num=num)
             else:
@@ -420,7 +498,9 @@ async def odpriva_downloadFiles(client,info,admin,password,originalPath, req, la
                     jsonreq = json.dumps({'jsonrpc': '2.0', 'id': 'qwer',
                                           'method': 'aria2.addUri',
                                           "params": ["token:" + aria2Secret, [cc], dd]})
+
                     c = requests.post(aria2Link, data=jsonreq)
+
                     text = f"推送下载：`{i['FileLeafRef']}`\n下载路径:`{download_path}`\n推送结果:`{c.text}`"
                     try:
                         await client.edit_message_text(text=text, chat_id=info.chat.id, message_id=info.message_id,
@@ -428,12 +508,16 @@ async def odpriva_downloadFiles(client,info,admin,password,originalPath, req, la
                     except Exception as e:
                         print(f"修改信息失败:{e}")
                     time.sleep(0.5)
+
         return fileCount
     except Exception as e:
         print(f"odpriva_downloadFiles {e}")
         await client.send_message(chat_id=info.chat.id, text=f"odpriva_downloadFiles {e}", parse_mode='markdown')
+
+
 async def odprivate_download(client, message):
     try:
+
         try:
             login_info=str(message.text).split(" ")
             print(f"odprivate_download{login_info}")
@@ -452,8 +536,10 @@ async def odprivate_download(client, message):
     except Exception as e:
         print(f"odprivate error {e}")
         await client.send_message(chat_id=message.chat.id, text=f"odprivate error {e}", parse_mode='markdown')
+
 def run_shell(gid,file_num,file_dir):
     shell = f"bash upload.sh \"{gid}\" \"{file_num}\" '{file_dir}' "
+
     print(shell)
     cmd = subprocess.Popen(shell, stdin=subprocess.PIPE, stderr=sys.stderr, close_fds=True,
                            stdout=subprocess.PIPE, universal_newlines=True, shell=True, bufsize=1)
@@ -462,7 +548,9 @@ def run_shell(gid,file_num,file_dir):
         if subprocess.Popen.poll(cmd) == 0:  # 判断子进程是否结束
             print("上传结束")
             return
+
 def check_upload(api, gid):
+
     time.sleep(10)
     global task
     print(f"检查上传 {task}")
@@ -473,6 +561,7 @@ def check_upload(api, gid):
         print("任务已删除，不需要上传")
         sys.stdout.flush()
         return
+
     key=1
     if len(task)!=0:
         for a in task:
@@ -485,12 +574,18 @@ def check_upload(api, gid):
     if key==1:
         if "[METADATA]"==currdownload.name:
             return
+
         file_dir = f"{currdownload.dir}/{currdownload.name}"
         file_num = int(len(currdownload.files))
         print(f"上传该任务:{file_dir}")
         sys.stdout.flush()
+
+
+
         t1 = threading.Thread(target=run_shell, args=(gid,file_num,file_dir))
         t1.start()
+
+
 async def run_await_rclone(dir,title,info,file_num,client, message,gid):
     global task
     task.append(gid)
@@ -498,9 +593,11 @@ async def run_await_rclone(dir,title,info,file_num,client, message,gid):
     sys.stdout.flush()
     Rclone_remote=os.environ.get('Remote')
     Upload=os.environ.get('Upload')
+
     rc_url = f"http://root:{Aria2_secret}@127.0.0.1:5572"
     info = await client.send_message(chat_id=message.chat.id, text="开始上传", parse_mode='markdown')
     name=f"{str(info.message_id)}_{str(info.chat.id)}"
+
     if int(file_num)==1:
         rcd_copyfile_url = f"{rc_url}/operations/copyfile"
         drv, left = os.path.split(dir)
@@ -511,64 +608,96 @@ async def run_await_rclone(dir,title,info,file_num,client, message,gid):
             "dstRemote": left,
             "_async": True,
         }
+
         html = requests.post(url=rcd_copyfile_url, json=data)
         result = html.json()
+
         jobid = result["jobid"]
+
         rcd_status_url = f"{rc_url}/job/status"
+
+
         while requests.post(url=rcd_status_url, json={"jobid": jobid}).json()['finished'] == False:
+
             job_status = requests.post(url=f"{rc_url}/core/stats", json={"group": f"job/{jobid}"}).json()
+
             if "transferring" in job_status:
+
                 if job_status['transferring'][0]['eta'] == None:
                     eta = "暂无"
                 else:
                     eta = cal_time(job_status['transferring'][0]['eta'])
+
+
                 text = f"任务ID:`{jobid}`\n" \
                        f"任务名称:`{title}`\n" \
                        f"传输部分:`{hum_convert(job_status['transferring'][0]['bytes'])}/{hum_convert(job_status['transferring'][0]['size'])}`\n" \
                        f"传输进度:`{job_status['transferring'][0]['percentage']}%`\n" \
                        f"传输速度:`{hum_convert(job_status['transferring'][0]['speed'])}/s`\n" \
                        f"平均速度:`{hum_convert(job_status['transferring'][0]['speedAvg'])}/s`\n"
+
                 try:
                     await client.edit_message_text(text=text, chat_id=info.chat.id, message_id=info.message_id,
                                              parse_mode='markdown')
+
                 except:
                     continue
+
             else:
                 print("等待信息加载")
+
             time.sleep(1)
+
+
     else:
         rcd_copyfile_url = f"{rc_url}/sync/copy"
+
         data = {
             "srcFs": dir,
             "dstFs": f"{Rclone_remote}:{Upload}/{title}",
             "createEmptySrcDirs": True,
             "_async": True,
         }
+
         html = requests.post(url=rcd_copyfile_url, json=data)
         result = html.json()
         jobid = result["jobid"]
+
         rcd_status_url = f"{rc_url}/job/status"
+
+
         while requests.post(url=rcd_status_url, json={"jobid": jobid}).json()['finished'] == False:
+
             job_status = requests.post(url=f"{rc_url}/core/stats", json={"group": f"job/{jobid}"}).json()
+
             if "transferring" in job_status:
+
                 if job_status['eta'] == None:
                     eta = "暂无"
                 else:
                     eta = cal_time(job_status['eta'])
+
+
                 text = f"任务ID:`{jobid}`\n" \
                        f"任务名称:`{title}`\n" \
                        f"传输部分:`{hum_convert(job_status['bytes'])}/{hum_convert(job_status['totalBytes'])}`\n" \
                        f"传输进度:`{only_progessbar(job_status['bytes'], job_status['totalBytes'])}%`\n" \
                        f"传输速度:`{hum_convert(job_status['speed'])}/s`\n" \
                        f"剩余时间:`{eta}`"
+
                 try:
                     await client.edit_message_text(text=text, chat_id=info.chat.id, message_id=info.message_id,
                                              parse_mode='markdown')
+
                 except:
                     continue
+
             else:
                 print("等待信息")
+
             time.sleep(1)
+
+
     requests.post(url=f"{rc_url}/core/stats-delete", json={"group": f"job/{jobid}"}).json()
     requests.post(url=f"{rc_url}/fscache/clear").json()
     print("上传结束")
@@ -597,7 +726,10 @@ async def run_await_rclone(dir,title,info,file_num,client, message,gid):
             return
         except:
             return
+
+
 def the_download(client, message,url):
+
     try:
         download = aria2.add_magnet(url)
     except Exception as e:
@@ -608,6 +740,7 @@ def the_download(client, message,url):
             return None
     prevmessagemag = None
     info=client.send_message(chat_id=message.chat.id,text="添加任务",parse_mode='markdown')
+
     inline_keyboard = [
         [
             InlineKeyboardButton(
@@ -616,9 +749,12 @@ def the_download(client, message,url):
             )
         ]
     ]
+
     reply_markup = InlineKeyboardMarkup(inline_keyboard=inline_keyboard)
     client.edit_message_text(text="排队中", chat_id=info.chat.id, message_id=info.message_id,
                              parse_mode='markdown', reply_markup=reply_markup)
+
+
     temp_text=""
     while download.is_active:
         try:
@@ -631,6 +767,7 @@ def the_download(client, message,url):
                 except:
                     None
             barop = progessbar(download.completed_length,download.total_length)
+
             updateText = f"{download.status} \n" \
                          f"'{download.name}'\n" \
                          f"Progress : {hum_convert(download.completed_length)}/{hum_convert(download.total_length)} \n" \
@@ -647,6 +784,7 @@ def the_download(client, message,url):
                     None
             time.sleep(2)
         except:
+
             try:
                 download.update()
             except Exception as e:
@@ -661,6 +799,8 @@ def the_download(client, message,url):
                             None
                     return None
             time.sleep(2)
+
+
     time.sleep(2)
     match = str(download.followed_by_ids[0])
     downloads = aria2.get_downloads()
@@ -670,6 +810,7 @@ def the_download(client, message,url):
             currdownload = download
             break
     print("Download complete")
+
     new_inline_keyboard = [
         [
             InlineKeyboardButton(
@@ -686,14 +827,18 @@ def the_download(client, message,url):
             )
         ]
     ]
+
     new_reply_markup = InlineKeyboardMarkup(inline_keyboard=new_inline_keyboard)
     try:
         client.edit_message_text(text="Download complete", chat_id=info.chat.id, message_id=info.message_id,
                              parse_mode='markdown', reply_markup=new_reply_markup)
     except Exception as e:
         print(e)
+
     prevmessage = None
+
     while True:
+
         try:
             currdownload.update()
         except Exception as e:
@@ -708,6 +853,7 @@ def the_download(client, message,url):
             print(e)
             print("Issue in downloading!")
             continue
+
         if currdownload.status == 'removed':
             print("Magnet was cancelled")
             print("Magnet download was cancelled")
@@ -716,6 +862,7 @@ def the_download(client, message,url):
             except:
                 None
             break
+
         if currdownload.status == 'error':
             print("Mirror had an error")
             currdownload.remove(force=True, files=True)
@@ -725,11 +872,14 @@ def the_download(client, message,url):
             except:
                 None
             break
+
         print(f"Magnet Status? {currdownload.status}")
+
         if currdownload.status == "active":
             try:
                 currdownload.update()
                 barop = progessbar(currdownload.completed_length,currdownload.total_length)
+
                 updateText = f"{download.status} \n" \
                              f"'{currdownload.name}'\n" \
                              f"Progress : {hum_convert(currdownload.completed_length)}/{hum_convert(currdownload.total_length)} \n" \
@@ -737,6 +887,7 @@ def the_download(client, message,url):
                              f"Speed {hum_convert(currdownload.download_speed)}/s\n" \
                              f"{barop}\n" \
                              f"剩余空间:{get_free_space_mb()}GB"
+
                 if prevmessage != updateText:
                     print(f"更新状态\n{updateText}")
                     try:
@@ -755,6 +906,7 @@ def the_download(client, message,url):
             try:
                 currdownload.update()
                 barop = progessbar(currdownload.completed_length,currdownload.total_length)
+
                 updateText = f"{download.status} \n" \
                              f"'{currdownload.name}'\n" \
                              f"Progress : {hum_convert(currdownload.completed_length)}/{hum_convert(currdownload.total_length)} \n" \
@@ -762,6 +914,7 @@ def the_download(client, message,url):
                              f"Speed {hum_convert(currdownload.download_speed)}/s\n" \
                              f"{barop}\n" \
                              f"剩余空间:{get_free_space_mb()}GB"
+
                 if prevmessage != updateText:
                     print(f"更新状态\n{updateText}")
                     try:
@@ -777,12 +930,17 @@ def the_download(client, message,url):
         if currdownload.status=="complete":
             break
         time.sleep(2)
+
+
     print("开始上传")
     file_dir=f"{currdownload.dir}/{currdownload.name}"
     files_num=int(len(currdownload.files))
     run_rclone(file_dir,currdownload.name,info=info,file_num=files_num,client=client,message=message,gid=currdownload.gid)
     currdownload.remove(force=True,files=True)
+
+
     return
+
 def cal_time(upload_time):
     m, s = divmod(int(upload_time), 60)
     h, m = divmod(m, 60)
@@ -794,6 +952,7 @@ def cal_time(upload_time):
     else:
         last_time = "%d秒" % s
     return last_time
+
 def start_download(client, message):
     try:
         keywords = str(message.text)
@@ -807,8 +966,10 @@ def start_download(client, message):
             print(keywords)
             t1 = threading.Thread(target=the_download, args=(client, message,keywords))
             t1.start()
+
     except Exception as e:
         print(f"magnet :{e}")
+
 def only_progessbar(new, tot):
     """Builds progressbar
     Args:
@@ -822,15 +983,20 @@ def only_progessbar(new, tot):
     percent = round(new/float(tot) * 100.0, 1)
     bar = '=' * progress + '-' * (length - progress)
     return percent
+
 def run_rclone(dir,title,info,file_num,client, message,gid):
     global task
     task.append(gid)
     print(task)
     sys.stdout.flush()
     rc_url = f"http://root:{Aria2_secret}@127.0.0.1:5572"
+
+
     Rclone_remote=os.environ.get('Remote')
     Upload=os.environ.get('Upload')
     name=f"{str(info.message_id)}_{str(info.chat.id)}"
+
+
     if int(file_num)==1:
         rcd_copyfile_url = f"{rc_url}/operations/copyfile"
         drv, left = os.path.split(dir)
@@ -842,66 +1008,92 @@ def run_rclone(dir,title,info,file_num,client, message,gid):
             "_async": True,
         }
         print(data)
+
         html = requests.post(url=rcd_copyfile_url, json=data)
         result = html.json()
+
         jobid = result["jobid"]
+
         rcd_status_url = f"{rc_url}/job/status"
+
+
         while requests.post(url=rcd_status_url, json={"jobid": jobid}).json()['finished'] == False:
+
             job_status = requests.post(url=f"{rc_url}/core/stats", json={"group": f"job/{jobid}"}).json()
             print(job_status)
             if "transferring" in job_status:
+
                 if job_status['transferring'][0]['eta'] == None:
                     eta = "暂无"
                 else:
                     eta = cal_time(job_status['transferring'][0]['eta'])
                 print(f"剩余时间:{eta}")
+
                 text = f"任务ID:`{jobid}`\n" \
                        f"任务名称:`{title}`\n" \
                        f"传输部分:`{hum_convert(job_status['transferring'][0]['bytes'])}/{hum_convert(job_status['transferring'][0]['size'])}`\n" \
                        f"传输进度:`{job_status['transferring'][0]['percentage']}%`\n" \
                        f"传输速度:`{hum_convert(job_status['transferring'][0]['speed'])}/s`\n" \
                        f"平均速度:`{hum_convert(job_status['transferring'][0]['speedAvg'])}/s`\n"
+
                 try:
                     client.edit_message_text(text=text, chat_id=info.chat.id, message_id=info.message_id,
                                              parse_mode='markdown')
+
                 except:
                     continue
+
             else:
                 print("等待信息加载")
+
             time.sleep(1)
+
+
     else:
         rcd_copyfile_url = f"{rc_url}/sync/copy"
+
         data = {
             "srcFs": dir,
             "dstFs": f"{Rclone_remote}:{Upload}/{title}",
             "createEmptySrcDirs": True,
             "_async": True,
         }
+
         html = requests.post(url=rcd_copyfile_url, json=data)
         result = html.json()
         jobid = result["jobid"]
+
         rcd_status_url = f"{rc_url}/job/status"
+
+
         while requests.post(url=rcd_status_url, json={"jobid": jobid}).json()['finished'] == False:
+
             job_status = requests.post(url=f"{rc_url}/core/stats", json={"group": f"job/{jobid}"}).json()
             print(job_status)
             if "transferring" in job_status:
+
                 if job_status['eta'] == None:
                     eta = "暂无"
                 else:
                     eta = cal_time(job_status['eta'])
                 print(f"剩余时间:{eta}")
+
                 text = f"任务ID:`{jobid}`\n" \
                        f"任务名称:`{title}`\n" \
                        f"传输部分:`{hum_convert(job_status['bytes'])}/{hum_convert(job_status['totalBytes'])}`\n" \
                        f"传输进度:`{only_progessbar(job_status['bytes'], job_status['totalBytes'])}%`\n" \
                        f"传输速度:`{hum_convert(job_status['speed'])}/s`"
+
                 try:
                     client.edit_message_text(text=text, chat_id=info.chat.id, message_id=info.message_id,
                                              parse_mode='markdown')
+
                 except:
                     continue
+
             else:
                 print("等待信息")
+
             time.sleep(1)
     requests.post(url=f"{rc_url}/core/stats-delete", json={"group": f"job/{jobid}"}).json()
     requests.post(url=f"{rc_url}/fscache/clear").json()
@@ -931,6 +1123,10 @@ def run_rclone(dir,title,info,file_num,client, message,gid):
             return
         except:
             return
+
+
+
+
 def start_http_download(client, message):
     try:
         keywords = str(message.text)
@@ -944,8 +1140,10 @@ def start_http_download(client, message):
             print(keywords)
             t1 = threading.Thread(target=http_download, args=(client, message,keywords))
             t1.start()
+
     except Exception as e:
         print(f"start_http_download :{e}")
+
 def file_download(client, message,file_dir):
     #os.system("df -lh")
     try:
@@ -960,6 +1158,7 @@ def file_download(client, message,file_dir):
         if (str(e).endswith("No URI to download.")):
             print("No link provided!")
             client.send_message(chat_id=message.chat.id,text="No link provided!",parse_mode='markdown')
+
         return
     new_inline_keyboard=[
         [
@@ -977,12 +1176,14 @@ def file_download(client, message,file_dir):
         )
         ]
     ]
+
     new_reply_markup = InlineKeyboardMarkup(inline_keyboard=new_inline_keyboard)
     try:
         client.edit_message_text(text="Download complete",chat_id=info.chat.id,message_id=info.message_id,parse_mode='markdown' ,reply_markup=new_reply_markup)
     except:
         None
     prevmessage = None
+
     while currdownload.is_active or not currdownload.is_complete:
         time.sleep(2)
         try:
@@ -998,6 +1199,7 @@ def file_download(client, message,file_dir):
                 break
             print(e)
             print("Issue in downloading!")
+
         if currdownload.status == 'removed':
             print("Magnet was cancelled")
             print("Magnet download was cancelled")
@@ -1006,6 +1208,7 @@ def file_download(client, message,file_dir):
             except:
                 None
             break
+
         if currdownload.status == 'error':
             print("Mirror had an error")
             currdownload.remove(force=True, files=True)
@@ -1015,11 +1218,14 @@ def file_download(client, message,file_dir):
             except:
                 None
             break
+
         print(f"Magnet Status? {currdownload.status}")
+
         if currdownload.status == "active":
             try:
                 currdownload.update()
                 barop = progessbar(currdownload.completed_length,currdownload.total_length)
+
                 updateText = f"{currdownload.status} \n" \
                              f"'{currdownload.name}'\n" \
                              f"Progress : {hum_convert(currdownload.completed_length)}/{hum_convert(currdownload.total_length)} \n" \
@@ -1027,6 +1233,7 @@ def file_download(client, message,file_dir):
                              f"Speed {hum_convert(currdownload.download_speed)}/s\n" \
                              f"{barop}\n" \
                              f"剩余空间:{get_free_space_mb()}GB"
+
                 if prevmessage != updateText:
                     print(f"更新状态\n{updateText}")
                     try:
@@ -1040,10 +1247,12 @@ def file_download(client, message,file_dir):
                     break
                 print(e)
                 print("Issue in downloading!")
+
         elif currdownload.status == "paused":
             try:
                 currdownload.update()
                 barop = progessbar(currdownload.completed_length,currdownload.total_length)
+
                 updateText = f"{currdownload.status} \n" \
                              f"'{currdownload.name}'\n" \
                              f"Progress : {hum_convert(currdownload.completed_length)}/{hum_convert(currdownload.total_length)} \n" \
@@ -1051,6 +1260,7 @@ def file_download(client, message,file_dir):
                              f"Speed {hum_convert(currdownload.download_speed)}/s\n" \
                              f"{barop}\n" \
                              f"剩余空间:{get_free_space_mb()}GB"
+
                 if prevmessage != updateText:
                     print(f"更新状态\n{updateText}")
                     try:
@@ -1058,9 +1268,15 @@ def file_download(client, message,file_dir):
                         prevmessage = updateText
                     except:
                         None
+
             except Exception as e:
                 print(e)
                 print("Download Paused Flood")
+
+
+
+
+
     if currdownload.is_complete:
         print(currdownload.name)
         try:
@@ -1070,11 +1286,13 @@ def file_download(client, message,file_dir):
             run_rclone(file_dir,currdownload.name,info=info,file_num=files_num,client=client, message=message,gid=currdownload.gid)
             currdownload.remove(force=True,files=True)
             return
+
         except Exception as e:
             print(e)
             print("Upload Issue!")
             return
     return None
+
 def http_download(client, message,url):
     try:
         currdownload = aria2.add_uris([url])
@@ -1101,11 +1319,15 @@ def http_download(client, message,url):
             )
         ]
     ]
+
     new_reply_markup = InlineKeyboardMarkup(inline_keyboard=new_inline_keyboard)
     client.edit_message_text(text="排队中", chat_id=info.chat.id, message_id=info.message_id,
                              parse_mode='markdown', reply_markup=new_reply_markup)
+
+
     prevmessage=None
     while currdownload.is_active or not currdownload.is_complete:
+
         try:
             currdownload.update()
         except Exception as e:
@@ -1119,6 +1341,7 @@ def http_download(client, message,url):
                 break
             print(e)
             print("url in downloading!")
+
         if currdownload.status == 'removed':
             print("url was cancelled")
             print("url download was cancelled")
@@ -1127,6 +1350,7 @@ def http_download(client, message,url):
             except:
                 None
             break
+
         if currdownload.status == 'error':
             print("url had an error")
             currdownload.remove(force=True, files=True)
@@ -1136,17 +1360,21 @@ def http_download(client, message,url):
             except:
                 None
             break
+
         print(f"url Status? {currdownload.status}")
+
         if currdownload.status == "active":
             try:
                 currdownload.update()
                 barop = progessbar(currdownload.completed_length,currdownload.total_length)
+
                 updateText = f"{currdownload.status} \n" \
                              f"'{currdownload.name}'\n" \
                              f"Progress : {hum_convert(currdownload.completed_length)}/{hum_convert(currdownload.total_length)} \n" \
                              f"Speed {hum_convert(currdownload.download_speed)}/s\n" \
                              f"{barop}\n" \
                              f"剩余空间:{get_free_space_mb()}GB"
+
                 if prevmessage != updateText:
                     print(f"更新状态\n{updateText}")
                     try:
@@ -1165,12 +1393,14 @@ def http_download(client, message,url):
             try:
                 currdownload.update()
                 barop = progessbar(currdownload.completed_length,currdownload.total_length)
+
                 updateText = f"{currdownload.status} \n" \
                              f"'{currdownload.name}'\n" \
                              f"Progress : {hum_convert(currdownload.completed_length)}/{hum_convert(currdownload.total_length)} \n" \
                              f"Speed {hum_convert(currdownload.download_speed)}/s\n" \
                              f"{barop}\n" \
                              f"剩余空间:{get_free_space_mb()}GB"
+
                 if prevmessage != updateText:
                     print(f"更新状态\n{updateText}")
                     try:
@@ -1184,6 +1414,7 @@ def http_download(client, message,url):
                 print("Download Paused Flood")
                 time.sleep(2)
         time.sleep(2)
+
     if currdownload.is_complete:
         print(currdownload.name)
         try:
@@ -1191,10 +1422,13 @@ def http_download(client, message,url):
             file_dir=f"{currdownload.dir}/{currdownload.name}"
             run_rclone(file_dir,currdownload.name,info=info,file_num=1,client=client, message=message,gid=currdownload.gid)
             currdownload.remove(force=True,files=True)
+
         except Exception as e:
             print(e)
             print("Upload Issue!")
     return None
+
+
 def progessbar(new, tot):
     """Builds progressbar
     Args:
@@ -1208,6 +1442,8 @@ def progessbar(new, tot):
     percent = round(new/float(tot) * 100.0, 1)
     bar = '=' * progress + '-' * (length - progress)
     return '[%s] %s %s\r' % (bar, percent, '%')
+
+
 def hum_convert(value):
     value=float(value)
     units = ["B", "KB", "MB", "GB", "TB", "PB"]
@@ -1216,6 +1452,7 @@ def hum_convert(value):
         if (value / size) < 1:
             return "%.2f%s" % (value, units[i])
         value = value / size
+
 def get_free_space_mb():
     result=os.statvfs('/root/')
     block_size=result.f_frsize
@@ -1228,22 +1465,29 @@ def get_free_space_mb():
     print('total_size = %s' % int(total_size))
     print('free_size = %s' % free_size)
     return int(free_size)
+
 def progress(current, total,client,message,name):
+
     print(f"{current * 100 / total:.1f}%")
     pro=f"{current * 100 / total:.1f}%"
     try:
         client.edit_message_text(chat_id=message.chat.id,message_id=message.message_id,text=f"{name}\n上传中:{pro}")
     except Exception as e:
         print("e")
+
+
 async def more_magnet(client, message):
     try:
         text=message.text
         if "magnet" in text:
             if "\n" in text:
+
                 magnet_list=str(text).split("\n")
+
                 for magnet in magnet_list:
                     t1 = threading.Thread(target=the_download, args=(client, message, magnet))
                     t1.start()
+
             else:
                 t1 = threading.Thread(target=the_download, args=(client, message,text))
                 t1.start()
@@ -1251,6 +1495,8 @@ async def more_magnet(client, message):
     except Exception as e :
         print(f"more_magnet error :{e}")
         await client.send_message(chat_id=message.chat.id, text=f"more_magnet error :{e}")
+
+
 async def temp_telegram_file(client, message,file_list):
     try:
         if len(file_list) == 0:
@@ -1271,6 +1517,7 @@ async def temp_telegram_file(client, message,file_list):
                     file_list.append(a)
             await temp_telegram_file(client, message,file_list)
             return file_list
+
         elif info.text == "/cancel":
             await client.send_message(text="取消发送", chat_id=message.chat.id, parse_mode='markdown')
             return []
@@ -1281,12 +1528,14 @@ async def temp_telegram_file(client, message,file_list):
             await client.send_message(text="发送的不是文件", chat_id=message.chat.id, parse_mode='markdown')
             await temp_telegram_file(client, message,file_list)
             return file_list
+
         else:
             try:
                 file_list.append(info)
                 temp_file= await temp_telegram_file(client, message,file_list)
                 file_list=temp_file
                 return file_list
+
             except Exception as e:
                 print(f"标记1 {e}")
                 sys.stdout.flush()
@@ -1295,17 +1544,27 @@ async def temp_telegram_file(client, message,file_list):
     except Exception as e:
         print(f"下载文件失败 {e}")
         sys.stdout.flush()
+
+
+
+
+
 async def send_telegram_file(client, message):
     try:
+
         temp = await temp_telegram_file(client,message,[])
+
         sys.stdout.flush()
+
         if len(temp)==0:
             return
         elif len(temp)==1:
             file_dir = await client.download_media(message=temp[0])
+
             t1 = threading.Thread(target=file_download, args=(client, message, file_dir))
             t1.start()
             return
+
         else:
             for a in temp:
                 file_dir = await client.download_media(message=a)
@@ -1315,7 +1574,12 @@ async def send_telegram_file(client, message):
     except Exception as e:
         print(f"start_down_telegram_file {e}")
         await client.send_message(text=f"下载文件失败:{e}", chat_id=message.chat.id, parse_mode='markdown')
+
         sys.stdout.flush()
+
+
+
+
 def http_downloadtg(client, message,url):
     try:
         currdownload = aria2.add_uris([url])
@@ -1342,11 +1606,15 @@ def http_downloadtg(client, message,url):
             )
         ]
     ]
+
     new_reply_markup = InlineKeyboardMarkup(inline_keyboard=new_inline_keyboard)
     client.edit_message_text(text="排队中", chat_id=info.chat.id, message_id=info.message_id,
                              parse_mode='markdown', reply_markup=new_reply_markup)
+
+
     prevmessage=None
     while currdownload.is_active or not currdownload.is_complete:
+
         try:
             currdownload.update()
         except Exception as e:
@@ -1358,7 +1626,9 @@ def http_downloadtg(client, message,url):
                 except:
                     None
                 break
-            print(e)            print("url in downloading!")
+            print(e)
+            print("url in downloading!")
+
         if currdownload.status == 'removed':
             print("url was cancelled")
             print("url download was cancelled")
@@ -1367,6 +1637,7 @@ def http_downloadtg(client, message,url):
             except:
                 None
             break
+
         if currdownload.status == 'error':
             print("url had an error")
             currdownload.remove(force=True, files=True)
@@ -1376,17 +1647,21 @@ def http_downloadtg(client, message,url):
             except:
                 None
             break
+
         print(f"url Status? {currdownload.status}")
+
         if currdownload.status == "active":
             try:
                 currdownload.update()
                 barop = progessbar(currdownload.completed_length,currdownload.total_length)
+
                 updateText = f"{currdownload.status} \n" \
                              f"'{currdownload.name}'\n" \
                              f"Progress : {hum_convert(currdownload.completed_length)}/{hum_convert(currdownload.total_length)} \n" \
                              f"Speed {hum_convert(currdownload.download_speed)}/s\n" \
                              f"{barop}\n" \
                              f"剩余空间:{get_free_space_mb()}GB"
+
                 if prevmessage != updateText:
                     print(f"更新状态\n{updateText}")
                     try:
@@ -1405,12 +1680,14 @@ def http_downloadtg(client, message,url):
             try:
                 currdownload.update()
                 barop = progessbar(currdownload.completed_length,currdownload.total_length)
+
                 updateText = f"{currdownload.status} \n" \
                              f"'{currdownload.name}'\n" \
                              f"Progress : {hum_convert(currdownload.completed_length)}/{hum_convert(currdownload.total_length)} \n" \
                              f"Speed {hum_convert(currdownload.download_speed)}/s\n" \
                              f"{barop}\n" \
                              f"剩余空间:{get_free_space_mb()}GB"
+
                 if prevmessage != updateText:
                     print(f"更新状态\n{updateText}")
                     try:
@@ -1424,6 +1701,7 @@ def http_downloadtg(client, message,url):
                 print("Download Paused Flood")
                 time.sleep(2)
         time.sleep(2)
+
         time.sleep(1)
     if currdownload.is_complete:
         print(currdownload.name)
@@ -1432,12 +1710,15 @@ def http_downloadtg(client, message,url):
             file_dir=f"{currdownload.dir}/{currdownload.name}"
             client.send_document(chat_id=info.chat.id, document=file_dir, caption=currdownload.name, progress=progress,
                                        progress_args=(client, info, currdownload.name,))
+
             currdownload.remove(force=True,files=True)
+
         except Exception as e:
             print(e)
             print("Upload Issue!")
             currdownload.remove(force=True, files=True)
     return None
+
 #@bot.message_handler(commands=['mirrortg'],func=lambda message:str(message.chat.id) == str(Telegram_user_id))
 def start_http_downloadtg(client, message):
     try:
@@ -1452,5 +1733,9 @@ def start_http_downloadtg(client, message):
             print(keywords)
             t1 = threading.Thread(target=http_downloadtg, args=(client, message,keywords))
             t1.start()
+
     except Exception as e:
         print(f"start_http_download :{e}")
+
+
+
