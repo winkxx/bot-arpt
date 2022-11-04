@@ -29,6 +29,7 @@ chmod 0777 /bot-arpt
 mkdir /bot/
 chmod 0777 /bot
 mv /bot-arpt/bot/* /bot/
+chmod 0777 /bot
 
 rm /etc/nginx/nginx.conf
 cp /bot-arpt/root/nginx.conf /etc/nginx/
