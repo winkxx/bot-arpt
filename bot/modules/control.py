@@ -1,15 +1,4 @@
-Skip to content
-Search or jump to…
-Pull requests
-Issues
-Marketplace
-Explore
- 
-@winkxx 
-winkxx
-/
-bot-arpt
-Public
+
 # -*- coding: utf-8 -*-
 
 from config import aria2, BOT_name,Rclone_share,Aria2_secret
