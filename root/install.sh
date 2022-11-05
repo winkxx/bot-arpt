@@ -32,7 +32,9 @@ echo $OS_type
 # mv /usr/bin/fclone /usr/bin/rclone
 # sudo -v ; curl https://rclone.org/install.sh | sudo bash
 # chmod 777 /usr/bin/rclone
-curl https://rclone.org/install.sh | sudo bash
+
+
+
 
 pip3 install -U yt-dlp
 wget https://github.com/P3TERX/Aria2-Pro-Core/releases/download/1.36.0_2021.08.22/aria2-1.36.0-static-linux-amd64.tar.gz
@@ -44,6 +46,14 @@ pip3 install aria2p
 sudo chmod 777 /root/.aria2/
 
 
+
+
+
+curl https://rclone.org/install.sh | sudo bash
+
 curl -fsSL https://raw.githubusercontent.com/filebrowser/get/master/get.sh | bash
+
+
+
 #wget https://github.com/FolderMagic/FolderMagic/raw/master/FolderMagic
 #chmod +x FolderMagic
