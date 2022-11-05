@@ -28,10 +28,11 @@ echo $OS_type
 #mv ffmpeg-git-*/ffmpeg  ffmpeg-git-*/ffprobe /usr/bin/
 
 
-bash <(curl -sL install.emengweb.com/fclone.sh)
-mv /usr/bin/fclone /usr/bin/rclone
+# bash <(curl -sL install.emengweb.com/fclone.sh)
+# mv /usr/bin/fclone /usr/bin/rclone
 # sudo -v ; curl https://rclone.org/install.sh | sudo bash
-chmod 777 /usr/bin/rclone
+# chmod 777 /usr/bin/rclone
+curl https://rclone.org/install.sh | sudo bash
 
 pip3 install -U yt-dlp
 wget https://github.com/P3TERX/Aria2-Pro-Core/releases/download/1.36.0_2021.08.22/aria2-1.36.0-static-linux-amd64.tar.gz
