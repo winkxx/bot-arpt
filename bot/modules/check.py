@@ -21,7 +21,7 @@ def new_clock():
     except Exception as e:
             print(f"new_clock error :{e}")
 
-#检查rclone
+#检查rclone.
 def second_clock():
     try:
 
