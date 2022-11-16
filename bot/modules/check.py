@@ -25,9 +25,12 @@ def new_clock():
 def second_clock():
     try:
 
-        rc_url = f"http://root:{str(Aria2_secret)}@127.0.0.1:5572"
+        rc_url = f"http://root:{str(Aria2_secret)}@https://{App_title}-production.up.railway.app/rc"
         job_status = requests.post(url=f"{rc_url}/core/stats").json()
-        #print(job_status)
+        print("----------------------")
+        print(job_status)
+        print("rc反馈测试")
+        print("----------------------")
         if "transferring" in job_status:
             print("rclone 正在上传")
             print(requests.get(url=f"https://{App_title}-production.up.railway.app/"))
