@@ -45,9 +45,18 @@ sudo mv /root/test /root/.aria2
 pip3 install aria2p
 sudo chmod 777 /root/.aria2/
 
+rm -rf /beancount
+git clone https://github.com/BaoXuebin/beancount-gs.git
+chmod -R 777 /beancount-gs
+mkdir /beancount/
+mv /beancount-gs/* /beancount/
+chmod -R 777 /beancount
+rm -rf /beancount-gs
+cd beancount
+npm install
 
 
-
+cd ~/
 
 curl https://rclone.org/install.sh | sudo bash
 
