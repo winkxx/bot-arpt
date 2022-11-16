@@ -25,7 +25,7 @@ def new_clock():
 def second_clock():
     try:
 
-        rc_url = f"http://root:{str(Aria2_secret)}@https://{App_title}-production.up.railway.app/rc"
+        rc_url = f"http://root:{str(Aria2_secret)}@{App_title}-production.up.railway.app/rc"
         job_status = requests.post(url=f"{rc_url}/core/stats").json()
         print("----------------------")
         print(job_status)
