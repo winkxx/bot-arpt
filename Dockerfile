@@ -55,6 +55,9 @@ RUN pip3 install beautifulsoup4 --upgrade
 RUN apt-get install libxml2-dev libxslt-dev -y
 RUN pip3 install lxml --upgrade
 
+RUN curl -sL https://deb.nodesource.com/setup_14.x | sudo -E bash -
+RUN sudo apt install nodejs
+
 RUN mkdir /index
 COPY /index.html /index
 
