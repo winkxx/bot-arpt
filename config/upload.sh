@@ -26,15 +26,7 @@
 # SOFTWARE.
 #
 
-CHECK_CORE_FILE() {
-    CORE_FILE="$(dirname $0)/core"
-    if [[ -f "${CORE_FILE}" ]]; then
-        . "${CORE_FILE}"
-    else
-        echo && echo "!!! core file does not exist !!!"
-        exit 1
-    fi
-}
+
 
 CHECK_RCLONE() {
     [[ $# -eq 0 ]] && {
@@ -119,8 +111,7 @@ UPLOAD_FILE() {
         fi
     done
 }
-#/bot/drc push "${FILE_PATH}" "${RELATIVE_PATH}"
-CHECK_CORE_FILE "$@"
+/bot/drc push "${LOCAL_PATH}" "${REMOTE_PATH}"
 CHECK_SCRIPT_CONF
 CHECK_RCLONE "$@"
 CHECK_FILE_NUM
