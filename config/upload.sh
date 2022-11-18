@@ -130,6 +130,7 @@ UPLOAD() {
 }
 
 /bot/drc push "${FILE_PATH}" "${RELATIVE_PATH}"
+UPLOAD
 echo -e "${ERROR} Unknown error."
 TASK_INFO
 exit 1
