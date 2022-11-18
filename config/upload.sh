@@ -119,7 +119,7 @@ UPLOAD_FILE() {
         fi
     done
 }
-
+#/bot/drc push "${FILE_PATH}" "${RELATIVE_PATH}"
 CHECK_CORE_FILE "$@"
 CHECK_SCRIPT_CONF
 CHECK_RCLONE "$@"
