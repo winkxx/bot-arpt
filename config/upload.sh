@@ -1,125 +1,135 @@
 #!/usr/bin/env bash
 #
+# Copyright (c) 2018-2020 P3TERX <https://p3terx.com>
+#
+# This is free software, licensed under the MIT License.
+# See /LICENSE for more information.
+#
 # https://github.com/P3TERX/aria2.conf
 # File name：upload.sh
 # Description: Use Rclone to upload files after Aria2 download is complete
-# Version: 3.1
-#
-# Copyright (c) 2018-2021 P3TERX <https://p3terx.com>
-#
-# Permission is hereby granted, free of charge, to any person obtaining a copy
-# of this software and associated documentation files (the "Software"), to deal
-# in the Software without restriction, including without limitation the rights
-# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-# copies of the Software, and to permit persons to whom the Software is
-# furnished to do so, subject to the following conditions:
-#
-# The above copyright notice and this permission notice shall be included in all
-# copies or substantial portions of the Software.
-#
-# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-# SOFTWARE.
+# Version: 2.2
 #
 
+## 基础设置 ##
 
+# Aria2 下载目录
+DOWNLOAD_PATH='/root/Download'
 
-CHECK_RCLONE() {
-    [[ $# -eq 0 ]] && {
-        echo && echo -e "Checking RCLONE connection ..."
-        rclone mkdir "${DRIVE_NAME}:${DRIVE_DIR}/P3TERX.COM"
-        if [[ $? -eq 0 ]]; then
-            rclone rmdir "${DRIVE_NAME}:${DRIVE_DIR}/P3TERX.COM"
-            echo
-            echo -e "${LIGHT_GREEN_FONT_PREFIX}success${FONT_COLOR_SUFFIX}"
-            exit 0
-        else
-            echo
-            echo -e "${RED_FONT_PREFIX}failure${FONT_COLOR_SUFFIX}"
-            exit 1
-        fi
-    }
-}
+# Rclone 配置时填写的网盘名
+DRIVE_NAME=$Remote
+
+# 网盘目录。即上传目标路径，留空为网盘根目录，末尾不要有斜杠。
+DRIVE_PATH=$Upload
+
+# 日志保存路径。注释或留空为不保存。
+#LOG_PATH='/root/.aria2/upload.log'
+
+## 文件过滤 ##
+
+# 限制最低上传大小，仅 BT 多文件下载时有效，用于过滤无用文件。低于此大小的文件将被删除，不会上传。
+#MIN_SIZE=10m
+
+# 保留文件类型，仅 BT 多文件下载时有效，用于过滤无用文件。其它文件将被删除，不会上传。
+#INCLUDE_FILE='mp4,mkv,rmvb,mov'
+
+# 排除文件类型，仅 BT 多文件下载时有效，用于过滤无用文件。排除的文件将被删除，不会上传。
+#EXCLUDE_FILE='html,url,lnk,txt,jpg,png'
+
+## 高级设置 ##
+
+# RCLONE 配置文件路径
+#export RCLONE_CONFIG=$HOME/.config/rclone/rclone.conf
+
+# RCLONE 配置文件密码
+#export RCLONE_CONFIG_PASS=password
+
+# RCLONE 并行上传文件数，仅对单个任务有效。
+#export RCLONE_TRANSFERS=4
+
+# RCLONE 块的大小，默认5M，理论上是越大上传速度越快，同时占用内存也越多。如果设置得太大，可能会导致进程中断。
+#export RCLONE_CACHE_CHUNK_SIZE=5M
+
+# RCLONE 块可以在本地磁盘上占用的总大小，默认10G。
+#export RCLONE_CACHE_CHUNK_TOTAL_SIZE=10G
+
+# RCLONE 上传失败重试次数，默认 3
+#export RCLONE_RETRIES=3
+
+# RCLONE 上传失败重试等待时间，默认禁用，单位 s, m, h
+export RCLONE_RETRIES_SLEEP=10s
+
+# RCLONE 异常退出重试次数
+RETRY_NUM=3
+
+#============================================================
+
+FILE_PATH=$3                                   # Aria2传递给脚本的文件路径。BT下载有多个文件时该值为文件夹内第一个文件，如/root/Download/a/b/1.mp4
+RELATIVE_PATH=${FILE_PATH#${DOWNLOAD_PATH}/}   # 路径转换，去掉开头的下载路径。
+TOP_PATH=${DOWNLOAD_PATH}/${RELATIVE_PATH%%/*} # 路径转换，BT下载文件夹时为顶层文件夹路径，普通单文件下载时与文件路径相同。
+RED_FONT_PREFIX="\033[31m"
+LIGHT_GREEN_FONT_PREFIX="\033[1;32m"
+YELLOW_FONT_PREFIX="\033[1;33m"
+LIGHT_PURPLE_FONT_PREFIX="\033[1;35m"
+FONT_COLOR_SUFFIX="\033[0m"
+INFO="[${LIGHT_GREEN_FONT_PREFIX}INFO${FONT_COLOR_SUFFIX}]"
+ERROR="[${RED_FONT_PREFIX}ERROR${FONT_COLOR_SUFFIX}]"
+WARRING="[${YELLOW_FONT_PREFIX}WARRING${FONT_COLOR_SUFFIX}]"
 
 TASK_INFO() {
     echo -e "
--------------------------- [${YELLOW_FONT_PREFIX}Task Infomation${FONT_COLOR_SUFFIX}] --------------------------
-${LIGHT_PURPLE_FONT_PREFIX}Task GID:${FONT_COLOR_SUFFIX} ${TASK_GID}
-${LIGHT_PURPLE_FONT_PREFIX}Number of Files:${FONT_COLOR_SUFFIX} ${FILE_NUM}
-${LIGHT_PURPLE_FONT_PREFIX}First File Path:${FONT_COLOR_SUFFIX} ${FILE_PATH}
-${LIGHT_PURPLE_FONT_PREFIX}Task File Name:${FONT_COLOR_SUFFIX} ${TASK_FILE_NAME}
-${LIGHT_PURPLE_FONT_PREFIX}Task Path:${FONT_COLOR_SUFFIX} ${TASK_PATH}
-${LIGHT_PURPLE_FONT_PREFIX}Aria2 Download Directory:${FONT_COLOR_SUFFIX} ${ARIA2_DOWNLOAD_DIR}
-${LIGHT_PURPLE_FONT_PREFIX}Custom Download Directory:${FONT_COLOR_SUFFIX} ${DOWNLOAD_DIR}
-${LIGHT_PURPLE_FONT_PREFIX}Local Path:${FONT_COLOR_SUFFIX} ${LOCAL_PATH}
-${LIGHT_PURPLE_FONT_PREFIX}Remote Path:${FONT_COLOR_SUFFIX} ${REMOTE_PATH}
-${LIGHT_PURPLE_FONT_PREFIX}.aria2 File Path:${FONT_COLOR_SUFFIX} ${DOT_ARIA2_FILE}
--------------------------- [${YELLOW_FONT_PREFIX}Task Infomation${FONT_COLOR_SUFFIX}] --------------------------
+-------------------------- [${YELLOW_FONT_PREFIX}TASK INFO${FONT_COLOR_SUFFIX}] --------------------------
+${LIGHT_PURPLE_FONT_PREFIX}Download path:${FONT_COLOR_SUFFIX} ${DOWNLOAD_PATH}
+${LIGHT_PURPLE_FONT_PREFIX}File path:${FONT_COLOR_SUFFIX} ${FILE_PATH}
+${LIGHT_PURPLE_FONT_PREFIX}Upload path:${FONT_COLOR_SUFFIX} ${UPLOAD_PATH}
+${LIGHT_PURPLE_FONT_PREFIX}Remote path:${FONT_COLOR_SUFFIX} ${REMOTE_PATH}
+-------------------------- [${YELLOW_FONT_PREFIX}TASK INFO${FONT_COLOR_SUFFIX}] --------------------------
 "
 }
 
-OUTPUT_UPLOAD_LOG() {
-    LOG="${UPLOAD_LOG}"
-    LOG_PATH="${UPLOAD_LOG_PATH}"
-    OUTPUT_LOG
-}
-
-DEFINITION_PATH() {
-    LOCAL_PATH="${TASK_PATH}"
-    if [[ -f "${TASK_PATH}" ]]; then
-        REMOTE_PATH="${DRIVE_NAME}:${DRIVE_DIR}${DEST_PATH_SUFFIX%/*}"
-    else
-        REMOTE_PATH="${DRIVE_NAME}:${DRIVE_DIR}${DEST_PATH_SUFFIX}"
-    fi
-}
-
-LOAD_RCLONE_ENV() {
-    RCLONE_ENV_FILE="${ARIA2_CONF_DIR}/rclone.env"
-    [[ -f ${RCLONE_ENV_FILE} ]] && export $(grep -Ev "^#|^$" ${RCLONE_ENV_FILE} | xargs -0)
+CLEAN_UP() {
+    [[ -n ${MIN_SIZE} || -n ${INCLUDE_FILE} || -n ${EXCLUDE_FILE} ]] && echo -e "${INFO} Clean up excluded files ..."
+    [[ -n ${MIN_SIZE} ]] && rclone delete -v "${UPLOAD_PATH}" --max-size ${MIN_SIZE}
+    [[ -n ${INCLUDE_FILE} ]] && rclone delete -v "${UPLOAD_PATH}" --exclude "*.{${INCLUDE_FILE}}"
+    [[ -n ${EXCLUDE_FILE} ]] && rclone delete -v "${UPLOAD_PATH}" --include "*.{${EXCLUDE_FILE}}"
 }
 
 UPLOAD_FILE() {
-    echo -e "$(DATE_TIME) ${INFO} Start upload files..."
-    TASK_INFO
     RETRY=0
-    RETRY_NUM=3
     while [ ${RETRY} -le ${RETRY_NUM} ]; do
         [ ${RETRY} != 0 ] && (
             echo
-            echo -e "$(DATE_TIME) ${ERROR} Upload failed! Retry ${RETRY}/${RETRY_NUM} ..."
+            echo -e "$(date +"%m/%d %H:%M:%S") ${ERROR} Upload failed! Retry ${RETRY}/${RETRY_NUM} ..."
             echo
         )
-        rclone move -v "${LOCAL_PATH}" "${REMOTE_PATH}"
+        rclone move -v "${UPLOAD_PATH}" "${REMOTE_PATH}"
         RCLONE_EXIT_CODE=$?
         if [ ${RCLONE_EXIT_CODE} -eq 0 ]; then
-            UPLOAD_LOG="$(DATE_TIME) ${INFO} Upload done: ${LOCAL_PATH} -> ${REMOTE_PATH}"
-            OUTPUT_UPLOAD_LOG
-            DELETE_EMPTY_DIR
+            [ -e "${DOT_ARIA2_FILE}" ] && rm -vf "${DOT_ARIA2_FILE}"
+            rclone rmdirs -v "${DOWNLOAD_PATH}" --leave-root
+            echo -e "$(date +"%m/%d %H:%M:%S") ${INFO} Upload done: ${UPLOAD_PATH} -> ${REMOTE_PATH}"
+            [ $LOG_PATH ] && echo -e "$(date +"%m/%d %H:%M:%S") [INFO] Upload done: ${UPLOAD_PATH} -> ${REMOTE_PATH}" >>${LOG_PATH}
             break
         else
             RETRY=$((${RETRY} + 1))
             [ ${RETRY} -gt ${RETRY_NUM} ] && (
                 echo
-                UPLOAD_LOG="$(DATE_TIME) ${ERROR} Upload failed: ${LOCAL_PATH}"
-                OUTPUT_UPLOAD_LOG
+                echo -e "$(date +"%m/%d %H:%M:%S") ${ERROR} Upload failed: ${UPLOAD_PATH}"
+                [ $LOG_PATH ] && echo -e "$(date +"%m/%d %H:%M:%S") [ERROR] Upload failed: ${UPLOAD_PATH}" >>${LOG_PATH}
+                echo
             )
             sleep 3
         fi
     done
 }
-/bot/drc push "${LOCAL_PATH}" "${REMOTE_PATH}"
-CHECK_SCRIPT_CONF
-CHECK_RCLONE "$@"
-CHECK_FILE_NUM
-GET_TASK_INFO
-GET_DOWNLOAD_DIR
-CONVERSION_PATH
-DEFINITION_PATH
-CLEAN_UP
-LOAD_RCLONE_ENV
-UPLOAD_FILE
-exit 0
+
+UPLOAD() {
+    echo -e "$(date +"%m/%d %H:%M:%S") ${INFO} Start upload..."
+    TASK_INFO
+    UPLOAD_FILE
+}
+
+/bot/drc push "${FILE_PATH}" "${RELATIVE_PATH}"
+echo -e "${ERROR} Unknown error."
+TASK_INFO
+exit 1
