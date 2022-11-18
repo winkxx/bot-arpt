@@ -125,6 +125,7 @@ UPLOAD_FILE() {
 
 UPLOAD() {
     echo -e "$(date +"%m/%d %H:%M:%S") ${INFO} Start upload..."
+    echo "总上传开始"
     TASK_INFO
     UPLOAD_FILE
 }
@@ -147,17 +148,20 @@ if [ "${TOP_PATH}" = "${FILE_PATH}" ] && [ $2 -eq 1 ]; then # 普通单文件下
     UPLOAD_PATH="${FILE_PATH}"
     REMOTE_PATH="${DRIVE_NAME}:${DRIVE_PATH}"
     UPLOAD
+    echo "1.上传开始"
     exit 0
 elif [ "${TOP_PATH}" != "${FILE_PATH}" ] && [ $2 -gt 1 ]; then # BT下载（文件夹内文件数大于1），移动整个文件夹到设定的网盘文件夹。
     UPLOAD_PATH="${TOP_PATH}"
     REMOTE_PATH="${DRIVE_NAME}:${DRIVE_PATH}/${RELATIVE_PATH%%/*}"
     CLEAN_UP
     UPLOAD
+    echo "2.上传开始"
     exit 0
 elif [ "${TOP_PATH}" != "${FILE_PATH}" ] && [ $2 -eq 1 ]; then # 第三方度盘工具下载（子文件夹或多级目录等情况下的单文件下载）、BT下载（文件夹内文件数等于1），移动文件到设定的网盘文件夹下的相同路径文件夹。
     UPLOAD_PATH="${FILE_PATH}"
     REMOTE_PATH="${DRIVE_NAME}:${DRIVE_PATH}/${RELATIVE_PATH%/*}"
     UPLOAD
+    echo "3.上传开始"
     exit 0
 fi
 
