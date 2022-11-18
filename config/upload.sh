@@ -60,7 +60,7 @@ DRIVE_PATH=$Upload
 export RCLONE_RETRIES_SLEEP=10s
 
 # RCLONE 异常退出重试次数
-RETRY_NUM=3
+RETRY_NUM=0
 
 #============================================================
 
