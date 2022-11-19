@@ -548,7 +548,8 @@ def run_shell(gid,file_num,file_dir):
         if subprocess.Popen.poll(cmd) == 0:  # 判断子进程是否结束
             print("上传结束")
             return
-        else print("卡在Upload.sh当中")
+        else:
+            print("卡在Upload.sh当中")
 
 def check_upload(api, gid):
 
