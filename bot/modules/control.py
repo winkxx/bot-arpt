@@ -639,6 +639,7 @@ async def run_await_rclone(dir,title,info,file_num,client, message,gid):
                 try:
                     await client.edit_message_text(text=text, chat_id=info.chat.id, message_id=info.message_id,
                                              parse_mode='markdown')
+                    print(text)
 
                 except:
                     continue
@@ -688,6 +689,7 @@ async def run_await_rclone(dir,title,info,file_num,client, message,gid):
                 try:
                     await client.edit_message_text(text=text, chat_id=info.chat.id, message_id=info.message_id,
                                              parse_mode='markdown')
+                    print(text)
 
                 except:
                     continue
