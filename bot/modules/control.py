@@ -780,8 +780,9 @@ def the_download(client, message,url):
             if prevmessagemag != updateText:
                 print(updateText)
                 try:
-                    client.edit_message_text(text=updateText,chat_id=info.chat.id,message_id=info.message_id,parse_mode='markdown', reply_markup=reply_markup)
+                    client.edit_message_text(text=updateText,chat_id=info.chat.id,message_id=info.message_id, reply_markup=reply_markup)
                     prevmessagemag = updateText
+                    print(updateText)
                 except:
                     None
             time.sleep(2)
@@ -1041,12 +1042,15 @@ def run_rclone(dir,title,info,file_num,client, message,gid):
                 try:
                     client.edit_message_text(text=text, chat_id=info.chat.id, message_id=info.message_id,
                                              parse_mode='markdown')
+                    print(text)
 
                 except:
                     continue
 
             else:
-                print("等待信息加载")
+                print(-----------------------------------------)
+                print("等待Rclone信息")
+                print(-----------------------------------------)
 
             time.sleep(1)
 
@@ -1089,12 +1093,15 @@ def run_rclone(dir,title,info,file_num,client, message,gid):
                 try:
                     client.edit_message_text(text=text, chat_id=info.chat.id, message_id=info.message_id,
                                              parse_mode='markdown')
+                    print(text)
 
                 except:
                     continue
 
             else:
-                print("等待信息")
+                print(-----------------------------------------)
+                print("等待Rclone信息")
+                print(-----------------------------------------)
 
             time.sleep(1)
     requests.post(url=f"{rc_url}/core/stats-delete", json={"group": f"job/{jobid}"}).json()
