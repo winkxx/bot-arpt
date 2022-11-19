@@ -137,42 +137,15 @@ UPLOAD() {
     UPLOAD_FILE
 }
 
-if [ -z $2 ]; then
-    echo && echo -e "1警告"
-    echo && echo -e "${ERROR} This script can only be used by passing parameters through Aria2."
-    echo && echo -e "${WARRING} 直接运行此脚本可能导致无法开机！"
-    exit 1
-elif [ $2 -eq 0 ]; then
-    echo && echo -e "2退出"
-    exit 0
-fi
+
 
 if [ -e "${FILE_PATH}.aria2" ]; then
     DOT_ARIA2_FILE="${FILE_PATH}.aria2"
 elif [ -e "${TOP_PATH}.aria2" ]; then
     DOT_ARIA2_FILE="${TOP_PATH}.aria2"
 fi
+UPLOAD
 
-if [ "${TOP_PATH}" = "${FILE_PATH}" ] && [ $2 -eq 1 ]; then # 普通单文件下载，移动文件到设定的网盘文件夹。
-    echo && echo -e "普通单文件上传"
-    UPLOAD_PATH="${FILE_PATH}"
-    REMOTE_PATH="${DRIVE_NAME}:${DRIVE_PATH}"
-    UPLOAD
-    exit 0
-elif [ "${TOP_PATH}" != "${FILE_PATH}" ] && [ $2 -gt 1 ]; then # BT下载（文件夹内文件数大于1），移动整个文件夹到设定的网盘文件夹。
-    echo && echo -e "BT多文件上传"
-    UPLOAD_PATH="${TOP_PATH}"
-    REMOTE_PATH="${DRIVE_NAME}:${DRIVE_PATH}/${RELATIVE_PATH%%/*}"
-    CLEAN_UP
-    UPLOAD
-    exit 0
-elif [ "${TOP_PATH}" != "${FILE_PATH}" ] && [ $2 -eq 1 ]; then # 第三方度盘工具下载（子文件夹或多级目录等情况下的单文件下载）、BT下载（文件夹内文件数等于1），移动文件到设定的网盘文件夹下的相同路径文件夹。
-    echo && echo -e "其他多文件上传"
-    UPLOAD_PATH="${FILE_PATH}"
-    REMOTE_PATH="${DRIVE_NAME}:${DRIVE_PATH}/${RELATIVE_PATH%/*}"
-    UPLOAD
-    exit 0
-fi
 /bot/drc push "${FILE_PATH}" "${RELATIVE_PATH}"
 echo -e "${ERROR} Unknown error."
 TASK_INFO
