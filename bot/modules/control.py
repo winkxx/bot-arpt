@@ -645,7 +645,9 @@ async def run_await_rclone(dir,title,info,file_num,client, message,gid):
                     continue
 
             else:
-                print("等待信息加载")
+                print("-----------------------------------------")
+                print("等待Rclone信息")
+                print("-----------------------------------------")
 
             time.sleep(1)
 
@@ -695,7 +697,9 @@ async def run_await_rclone(dir,title,info,file_num,client, message,gid):
                     continue
 
             else:
-                print("等待信息")
+                print("-----------------------------------------")
+                print("等待Rclone信息")
+                print("-----------------------------------------")
 
             time.sleep(1)
 
@@ -1048,9 +1052,9 @@ def run_rclone(dir,title,info,file_num,client, message,gid):
                     continue
 
             else:
-                print(-----------------------------------------)
+                print("-----------------------------------------")
                 print("等待Rclone信息")
-                print(-----------------------------------------)
+                print("-----------------------------------------")
 
             time.sleep(1)
 
@@ -1099,9 +1103,9 @@ def run_rclone(dir,title,info,file_num,client, message,gid):
                     continue
 
             else:
-                print(-----------------------------------------)
+                print("-----------------------------------------")
                 print("等待Rclone信息")
-                print(-----------------------------------------)
+                print("-----------------------------------------")
 
             time.sleep(1)
     requests.post(url=f"{rc_url}/core/stats-delete", json={"group": f"job/{jobid}"}).json()
