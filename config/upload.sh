@@ -60,7 +60,7 @@ DRIVE_PATH=$Upload
 export RCLONE_RETRIES_SLEEP=10s
 
 # RCLONE 异常退出重试次数
-RETRY_NUM=0
+RETRY_NUM=2
 
 #============================================================
 
@@ -96,45 +96,54 @@ CLEAN_UP() {
 
 UPLOAD_FILE() {
     RETRY=0
+    RETRY_NUM=2
+    TASK_INFO
     while [ ${RETRY} -le ${RETRY_NUM} ]; do
         [ ${RETRY} != 0 ] && (
             echo
             echo -e "$(date +"%m/%d %H:%M:%S") ${ERROR} Upload failed! Retry ${RETRY}/${RETRY_NUM} ..."
+            echo -e "$(date +"%m/%d %H:%M:%S") ${ERROR} 上传失败，重新尝试 Retry ${RETRY}/${RETRY_NUM} ..."
             echo
         )
-        rclone move -P -v "${UPLOAD_PATH}" "${REMOTE_PATH}"
+        rclone move -P -v "${UPLOAD_PATH}" "${REMOTE_PATH}"#更换为copy模式
+        echo && echo -e "rclone 开始上传"
         RCLONE_EXIT_CODE=$?
         if [ ${RCLONE_EXIT_CODE} -eq 0 ]; then
             [ -e "${DOT_ARIA2_FILE}" ] && rm -vf "${DOT_ARIA2_FILE}"
             rclone rmdirs -v "${DOWNLOAD_PATH}" --leave-root
             echo -e "$(date +"%m/%d %H:%M:%S") ${INFO} Upload done: ${UPLOAD_PATH} -> ${REMOTE_PATH}"
             [ $LOG_PATH ] && echo -e "$(date +"%m/%d %H:%M:%S") [INFO] Upload done: ${UPLOAD_PATH} -> ${REMOTE_PATH}" >>${LOG_PATH}
+            echo -e "$(date +"%m/%d %H:%M:%S") [INFO] 上传完成: ${UPLOAD_PATH} -> ${REMOTE_PATH}" >>${LOG_PATH}
             break
         else
             RETRY=$((${RETRY} + 1))
             [ ${RETRY} -gt ${RETRY_NUM} ] && (
                 echo
                 echo -e "$(date +"%m/%d %H:%M:%S") ${ERROR} Upload failed: ${UPLOAD_PATH}"
+                echo -e "$(date +"%m/%d %H:%M:%S") ${ERROR} 上传失败: ${UPLOAD_PATH}"
                 [ $LOG_PATH ] && echo -e "$(date +"%m/%d %H:%M:%S") [ERROR] Upload failed: ${UPLOAD_PATH}" >>${LOG_PATH}
                 echo
             )
             sleep 3
         fi
+       
     done
 }
 
 UPLOAD() {
     echo -e "$(date +"%m/%d %H:%M:%S") ${INFO} Start upload..."
-    echo "总上传开始"
+    echo && echo -e "开始上传"
     TASK_INFO
     UPLOAD_FILE
 }
 
 if [ -z $2 ]; then
+    echo && echo -e "1警告"
     echo && echo -e "${ERROR} This script can only be used by passing parameters through Aria2."
     echo && echo -e "${WARRING} 直接运行此脚本可能导致无法开机！"
     exit 1
 elif [ $2 -eq 0 ]; then
+    echo && echo -e "2退出"
     exit 0
 fi
 
@@ -145,23 +154,23 @@ elif [ -e "${TOP_PATH}.aria2" ]; then
 fi
 
 if [ "${TOP_PATH}" = "${FILE_PATH}" ] && [ $2 -eq 1 ]; then # 普通单文件下载，移动文件到设定的网盘文件夹。
+    echo && echo -e "普通单文件上传"
     UPLOAD_PATH="${FILE_PATH}"
     REMOTE_PATH="${DRIVE_NAME}:${DRIVE_PATH}"
     UPLOAD
-    echo "1.上传开始"
     exit 0
 elif [ "${TOP_PATH}" != "${FILE_PATH}" ] && [ $2 -gt 1 ]; then # BT下载（文件夹内文件数大于1），移动整个文件夹到设定的网盘文件夹。
+    echo && echo -e "BT多文件上传"
     UPLOAD_PATH="${TOP_PATH}"
     REMOTE_PATH="${DRIVE_NAME}:${DRIVE_PATH}/${RELATIVE_PATH%%/*}"
     CLEAN_UP
     UPLOAD
-    echo "2.上传开始"
     exit 0
 elif [ "${TOP_PATH}" != "${FILE_PATH}" ] && [ $2 -eq 1 ]; then # 第三方度盘工具下载（子文件夹或多级目录等情况下的单文件下载）、BT下载（文件夹内文件数等于1），移动文件到设定的网盘文件夹下的相同路径文件夹。
+    echo && echo -e "其他多文件上传"
     UPLOAD_PATH="${FILE_PATH}"
     REMOTE_PATH="${DRIVE_NAME}:${DRIVE_PATH}/${RELATIVE_PATH%/*}"
     UPLOAD
-    echo "3.上传开始"
     exit 0
 fi
 
