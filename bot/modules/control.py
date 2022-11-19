@@ -545,11 +545,13 @@ def run_shell(gid,file_num,file_dir):
                            stdout=subprocess.PIPE, universal_newlines=True, shell=True, bufsize=1)
     while True:
         time.sleep(2)
+        ztai=subprocess.Popen.poll(cmd)
         if subprocess.Popen.poll(cmd) == 0:  # 判断子进程是否结束
             print("上传结束")
             return
         else:
-            print("卡在Upload.sh当中")
+            print(ztai)
+            print("上传中")
 
 def check_upload(api, gid):
 
