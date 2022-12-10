@@ -544,14 +544,14 @@ def run_shell(gid,file_num,file_dir):
     cmd = subprocess.Popen(shell, stdin=subprocess.PIPE, stderr=sys.stderr, close_fds=True,
                            stdout=subprocess.PIPE, universal_newlines=True, shell=True, bufsize=1)
     while True:
-        time.sleep(2)
+        time.sleep(10)
         ztai=subprocess.Popen.poll(cmd)
         if subprocess.Popen.poll(cmd) == 0:  # 判断子进程是否结束
             print("上传结束")
             return
-        else:
-            print(ztai)
-            print("上传中")
+        elif subprocess.Popen.poll(cmd) == 1:
+            print("Upload.sh还在进行")
+          
 
 def check_upload(api, gid):
 
@@ -600,6 +600,7 @@ async def run_await_rclone(dir,title,info,file_num,client, message,gid):
 
     rc_url = f"https://root:{str(Aria2_secret)}@{App_title}-production.up.railway.app"
     info = await client.send_message(chat_id=message.chat.id, text="开始上传", parse_mode='markdown')
+    print(info)
     name=f"{str(info.message_id)}_{str(info.chat.id)}"
 
     if int(file_num)==1:
@@ -624,11 +625,15 @@ async def run_await_rclone(dir,title,info,file_num,client, message,gid):
         while requests.post(url=rcd_status_url, json={"jobid": jobid}).json()['finished'] == False:
 
             job_status = requests.post(url=f"{rc_url}/core/stats", json={"group": f"job/{jobid}"}).json()
+            print("--------------------------------")
+            print("rc-jobid反馈")
             print(job_status)
+            print("--------------------------------")
             if "transferring" in job_status:
 
                 if job_status['transferring'][0]['eta'] == None:
                     eta = "暂无"
+                    print("无任务")
                 else:
                     eta = cal_time(job_status['transferring'][0]['eta'])
                 print(f"剩余时间:{eta}")
@@ -639,6 +644,10 @@ async def run_await_rclone(dir,title,info,file_num,client, message,gid):
                        f"传输进度:`{job_status['transferring'][0]['percentage']}%`\n" \
                        f"传输速度:`{hum_convert(job_status['transferring'][0]['speed'])}/s`\n" \
                        f"平均速度:`{hum_convert(job_status['transferring'][0]['speedAvg'])}/s`\n"
+                print("-----------------------")
+                print("基本信息")
+                print(text)
+                print("-----------------------")
 
                 try:
                     await client.edit_message_text(text=text, chat_id=info.chat.id, message_id=info.message_id,
@@ -1489,6 +1498,8 @@ def progress(current, total,client,message,name):
     pro=f"{current * 100 / total:.1f}%"
     try:
         client.edit_message_text(chat_id=message.chat.id,message_id=message.message_id,text=f"{name}\n上传中:{pro}")
+        print("上传中")
+        print(f"{current * 100 / total:.1f}%")
     except Exception as e:
         print("e")
 
