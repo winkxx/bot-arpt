@@ -105,7 +105,7 @@ UPLOAD_FILE() {
             echo -e "$(date +"%m/%d %H:%M:%S") ${ERROR} 上传失败，重新尝试 Retry ${RETRY}/${RETRY_NUM} ..."
             echo
         )
-        rclone move -P -v "${UPLOAD_PATH}" "${REMOTE_PATH}"
+        rclone copy -P -v "${UPLOAD_PATH}" "${REMOTE_PATH}"
         echo && echo -e "rclone 开始上传"
         RCLONE_EXIT_CODE=$?
         if [ ${RCLONE_EXIT_CODE} -eq 0 ]; then
