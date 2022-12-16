@@ -550,7 +550,7 @@ def run_shell(gid,file_num,file_dir):
             print("上传结束")
             return
         elif subprocess.Popen.poll(cmd) == 1:
-            text1 = f""{gid}\" \"{file_num}\" '{file_dir}' --在上传"
+            text1 = f" "{gid}\" \"{file_num}\" '{file_dir}' 正在上传"
             print("text1")
             await client.send_message(text=text1, chat_id=info.chat.id, message_id=info.message_id)
 
