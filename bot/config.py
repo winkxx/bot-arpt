@@ -116,7 +116,7 @@ message_bytes = message.encode('ascii')
 base64_bytes = base64.b64encode(message_bytes)
 base64_message = base64_bytes.decode('ascii')
 if App_title!="" and "-" not in str(Telegram_user_id):
-    ari2_ng_url=f"https://{App_title}.herokuapp.com/ng/#!/settings/rpc/set/https/{App_title}.herokuapp.com/443/jsonrpc/{base64_message}"
+    ari2_ng_url=f"https://{App_title}-production.up.railway.app/ng/#!/settings/rpc/set/https/{App_title}-production.up.railway.app/443/jsonrpc/{base64_message}"
 
     client.send_message(chat_id=int(Telegram_user_id), text=f"Bot上线！！！\nAria2NG快捷面板：{ari2_ng_url}")
 
