@@ -105,7 +105,9 @@ aria2 = aria2p.API(
 
 
 client = Client("my_bot", bot_token=Telegram_bot_api,
-             api_hash=Api_hash, api_id=Api_id)
+             api_hash=Api_hash, api_id=Api_id
+
+             )
 
 client.start()
 
@@ -116,7 +118,7 @@ base64_message = base64_bytes.decode('ascii')
 if App_title!="" and "-" not in str(Telegram_user_id):
     ari2_ng_url=f"https://{App_title}-production.up.railway.app/ng/#!/settings/rpc/set/https/{App_title}-production.up.railway.app/443/jsonrpc/{base64_message}"
     client.send_message(chat_id=int(Telegram_user_id), text=f"Bot上线！！！\nAria2NG快捷面板：{ari2_ng_url}")
-
+    
 Bot_info=client.get_me()
 
 BOT_name=Bot_info.username
