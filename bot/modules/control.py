@@ -552,7 +552,7 @@ def run_shell(gid,file_num,file_dir):
             return
         elif subprocess.Popen.poll(cmd) == 1:
             print(text1)
-            await client.send_message(text=text1, chat_id=info.chat.id, message_id=info.message_id)
+            client.send_message(text=text1, chat_id=info.chat.id, message_id=info.message_id)
 
           
 
