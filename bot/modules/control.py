@@ -550,7 +550,10 @@ def run_shell(gid,file_num,file_dir):
             print("上传结束")
             return
         elif subprocess.Popen.poll(cmd) == 1:
-            print("Upload.sh还在进行")
+            text1 = f""{gid}\" \"{file_num}\" '{file_dir}' --在上传"
+            print("text1")
+            await client.send_message(text=text1, chat_id=info.chat.id, message_id=info.message_id)
+
           
 
 def check_upload(api, gid):
@@ -755,10 +758,10 @@ def the_download(client, message,url):
         print(e)
         if (str(e).endswith("No URI to download.")):
             print("No link provided!")
-            client.send_message(chat_id=message.chat.id,text="No link provided!",parse_mode='Markdown')
+            client.send_message(chat_id=message.chat.id,text="No link provided!")
             return None
     prevmessagemag = None
-    info=client.send_message(chat_id=message.chat.id,text="添加任务",parse_mode='markdown')
+    info=client.send_message(chat_id=message.chat.id,text="添加任务")
 
     inline_keyboard = [
         [
@@ -770,8 +773,7 @@ def the_download(client, message,url):
     ]
 
     reply_markup = InlineKeyboardMarkup(inline_keyboard=inline_keyboard)
-    client.edit_message_text(text="排队中", chat_id=info.chat.id, message_id=info.message_id,
-                             parse_mode='markdown', reply_markup=reply_markup)
+    client.edit_message_text(text="排队中", chat_id=info.chat.id, message_id=info.message_id,reply_markup=reply_markup)
 
 
     temp_text=""
@@ -781,7 +783,7 @@ def the_download(client, message,url):
             print("Downloading metadata")
             if temp_text!="Downloading metadata":
                 try:
-                    client.edit_message_text(text="Downloading metadata",chat_id=info.chat.id,message_id=info.message_id,parse_mode='markdown', reply_markup=reply_markup)
+                    client.edit_message_text(text="Downloading metadata",chat_id=info.chat.id,message_id=info.message_id,reply_markup=reply_markup)
                     temp_text="Downloading metadata"
                 except:
                     None
@@ -813,7 +815,7 @@ def the_download(client, message,url):
                     print("Metadata couldn't be downloaded")
                     if temp_text!="Metadata Cancelled/Failed":
                         try:
-                            client.edit_message_text(text="Metadata Cancelled/Failed",chat_id=info.chat.id,message_id=info.message_id,parse_mode='Markdown')
+                            client.edit_message_text(text="Metadata Cancelled/Failed",chat_id=info.chat.id,message_id=info.message_id)
                             temp_text="Metadata Cancelled/Failed"
                         except:
                             None
@@ -850,8 +852,7 @@ def the_download(client, message,url):
 
     new_reply_markup = InlineKeyboardMarkup(inline_keyboard=new_inline_keyboard)
     try:
-        client.edit_message_text(text="Download complete", chat_id=info.chat.id, message_id=info.message_id,
-                             parse_mode='markdown', reply_markup=new_reply_markup)
+        client.edit_message_text(text="Download complete", chat_id=info.chat.id, message_id=info.message_id,reply_markup=new_reply_markup)
     except Exception as e:
         print(e)
 
@@ -866,7 +867,7 @@ def the_download(client, message,url):
                 print("Magnet Deleted")
                 print("Magnet download was removed")
                 try:
-                    client.edit_message_text(text="Magnet download was removed",chat_id=info.chat.id,message_id=info.message_id,parse_mode='markdown')
+                    client.edit_message_text(text="Magnet download was removed",chat_id=info.chat.id,message_id=info.message_id)
                 except:
                     None
                 break
@@ -878,7 +879,7 @@ def the_download(client, message,url):
             print("Magnet was cancelled")
             print("Magnet download was cancelled")
             try:
-                client.edit_message_text(text="Magnet download was cancelled",chat_id=info.chat.id,message_id=info.message_id,parse_mode='markdown')
+                client.edit_message_text(text="Magnet download was cancelled",chat_id=info.chat.id,message_id=info.message_id)
             except:
                 None
             break
@@ -888,7 +889,7 @@ def the_download(client, message,url):
             currdownload.remove(force=True, files=True)
             print("Magnet failed to resume/download!\nRun /cancel once and try again.")
             try:
-                client.edit_message_text(text="Magnet failed to resume/download!\nRun /cancel once and try again.",chat_id=info.chat.id,message_id=info.message_id,parse_mode='markdown', reply_markup=new_reply_markup)
+                client.edit_message_text(text="Magnet failed to resume/download!\nRun /cancel once and try again.",chat_id=info.chat.id,message_id=info.message_id,reply_markup=new_reply_markup)
             except:
                 None
             break
@@ -911,7 +912,7 @@ def the_download(client, message,url):
                 if prevmessage != updateText:
                     print(f"更新状态\n{updateText}")
                     try:
-                        client.edit_message_text(text=updateText,chat_id=info.chat.id,message_id=info.message_id,parse_mode='markdown', reply_markup=new_reply_markup)
+                        client.edit_message_text(text=updateText,chat_id=info.chat.id,message_id=info.message_id,reply_markup=new_reply_markup)
                         prevmessage = updateText
                     except:
                         None
@@ -938,7 +939,7 @@ def the_download(client, message,url):
                 if prevmessage != updateText:
                     print(f"更新状态\n{updateText}")
                     try:
-                        client.edit_message_text(text=updateText,chat_id=info.chat.id,message_id=info.message_id,parse_mode='markdown', reply_markup=new_reply_markup)
+                        client.edit_message_text(text=updateText,chat_id=info.chat.id,message_id=info.message_id,reply_markup=new_reply_markup)
                         prevmessage = updateText
                     except:
                         None
@@ -1057,8 +1058,7 @@ def run_rclone(dir,title,info,file_num,client, message,gid):
                        f"平均速度:`{hum_convert(job_status['transferring'][0]['speedAvg'])}/s`\n"
 
                 try:
-                    client.edit_message_text(text=text, chat_id=info.chat.id, message_id=info.message_id,
-                                             parse_mode='markdown')
+                    client.edit_message_text(text=text, chat_id=info.chat.id, message_id=info.message_id)
                     print(text)
 
                 except:
@@ -1108,8 +1108,7 @@ def run_rclone(dir,title,info,file_num,client, message,gid):
                        f"传输速度:`{hum_convert(job_status['speed'])}/s`"
 
                 try:
-                    client.edit_message_text(text=text, chat_id=info.chat.id, message_id=info.message_id,
-                                             parse_mode='markdown')
+                    client.edit_message_text(text=text, chat_id=info.chat.id, message_id=info.message_id)
                     print(text)
 
                 except:
