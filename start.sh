@@ -40,7 +40,6 @@ rm -rf /bot-arpt
 nginx -c /etc/nginx/nginx.conf
 nginx -s reload
 
-nohup node /beancount/server.js &
 
 nohup aria2c --conf-path=/root/test/aria2.conf --rpc-listen-port=8080 --rpc-secret=$Aria2_secret &
 nohup rclone rcd --rc-addr=127.0.0.1:5572 --rc-user=root --rc-pass=$Aria2_secret --rc-allow-origin="https://rclone-ng-beta.vercel.app" &
