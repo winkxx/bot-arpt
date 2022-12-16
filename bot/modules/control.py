@@ -539,6 +539,7 @@ async def odprivate_download(client, message):
 
 def run_shell(gid,file_num,file_dir):
     shell = f"bash upload.sh \"{gid}\" \"{file_num}\" '{file_dir}' "
+    text1 = f"正在上传 \"{gid}\" \"{file_num}\" '{file_dir}' "
 
     print(shell)
     cmd = subprocess.Popen(shell, stdin=subprocess.PIPE, stderr=sys.stderr, close_fds=True,
@@ -550,8 +551,7 @@ def run_shell(gid,file_num,file_dir):
             print("上传结束")
             return
         elif subprocess.Popen.poll(cmd) == 1:
-            text1 = f" "{gid}\" \"{file_num}\" '{file_dir}' 正在上传"
-            print("text1")
+            print(text1)
             await client.send_message(text=text1, chat_id=info.chat.id, message_id=info.message_id)
 
           
