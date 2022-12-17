@@ -23,6 +23,10 @@ import nest_asyncio
 nest_asyncio.apply()
 os.system("df -lh")
 task=[]
+Telegram_bot_api=os.environ.get('Telegram_bot_api')
+Telegram_user_id=os.environ.get('Telegram_user_id')
+Api_hash=os.environ.get('Api_hash')
+Api_id=os.environ.get('Api_id')
 client = Client("my_bot", bot_token=Telegram_bot_api,
              api_hash=Api_hash, api_id=Api_id
 
