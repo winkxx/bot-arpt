@@ -23,16 +23,7 @@ import nest_asyncio
 nest_asyncio.apply()
 os.system("df -lh")
 task=[]
-Telegram_bot_api=os.environ.get('Telegram_bot_api')
-Telegram_user_id=os.environ.get('Telegram_user_id')
-Api_hash=os.environ.get('Api_hash')
-Api_id=os.environ.get('Api_id')
-client = Client("my_bot", bot_token=Telegram_bot_api,
-             api_hash=Api_hash, api_id=Api_id
 
-             )
-
-client.start()
 async def getpassword(iurl, password):
     global pheader, url
     browser = await launch(options={'args': ['--no-sandbox']})
@@ -566,7 +557,8 @@ def run_shell(gid,file_num,file_dir):
             print(text1)
             print("正在上传")
             print("----------------------")
-            client.send_message(text=text1, chat_id=info.chat.id, message_id=info.message_id)
+            client.send_message(text=f"{text1}", chat_id=int(Telegram_user_id))
+
 
           
 
