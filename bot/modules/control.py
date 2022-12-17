@@ -2,6 +2,7 @@
 
 from config import aria2, BOT_name,Rclone_share,Aria2_secret
 import sys
+from pyrogram import Client
 from pyrogram.types import InlineKeyboardMarkup,InlineKeyboardButton
 import os
 import time
@@ -22,7 +23,12 @@ import nest_asyncio
 nest_asyncio.apply()
 os.system("df -lh")
 task=[]
+client = Client("my_bot", bot_token=Telegram_bot_api,
+             api_hash=Api_hash, api_id=Api_id
 
+             )
+
+client.start()
 async def getpassword(iurl, password):
     global pheader, url
     browser = await launch(options={'args': ['--no-sandbox']})
@@ -550,8 +556,12 @@ def run_shell(gid,file_num,file_dir):
         if subprocess.Popen.poll(cmd) == 0:  # 判断子进程是否结束
             print("上传结束")
             return
-        elif subprocess.Popen.poll(cmd) == 1:
+        else:
+            
+            print("----------------------")
             print(text1)
+            print("正在上传")
+            print("----------------------")
             client.send_message(text=text1, chat_id=info.chat.id, message_id=info.message_id)
 
           
@@ -653,8 +663,7 @@ async def run_await_rclone(dir,title,info,file_num,client, message,gid):
                 print("-----------------------")
 
                 try:
-                    await client.edit_message_text(text=text, chat_id=info.chat.id, message_id=info.message_id,
-                                             parse_mode='markdown')
+                    await client.edit_message_text(text=text, chat_id=info.chat.id, message_id=info.message_id)
                     print(text)
 
                 except:
