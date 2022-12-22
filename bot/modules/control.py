@@ -568,16 +568,18 @@ def run_shell(gid,file_num,file_dir,client, message):
  
 def upload_fankui(text):
     text_fankui=text
-
-
-
-client_fankui = Client("my_bot2", bot_token=Telegram_bot_api,
+    client_fankui = Client("my_bot2", bot_token=Telegram_bot_api,
              api_hash=Api_hash, api_id=Api_id
 
              )
+    client_fankui.start()
+    client_fankui.send_message(text=f"{text_fankui}", chat_id=int(Telegram_user_id))
 
-client_fankui.start()
-client.send_message(text=f"{text_fankui}", chat_id=int(Telegram_user_id))
+
+
+
+
+
 
 
           
