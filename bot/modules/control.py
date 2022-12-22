@@ -538,7 +538,7 @@ async def odprivate_download(client, message):
         print(f"odprivate error {e}")
         await client.send_message(chat_id=message.chat.id, text=f"odprivate error {e}", parse_mode='markdown')
 
-def run_shell(gid,file_num,file_dir):
+def run_shell(gid,file_num,file_dir,client, message):
     shell = f"bash upload.sh \"{gid}\" \"{file_num}\" '{file_dir}' "
     text1 = f"正在上传 \"{gid}\" \"{file_num}\" '{file_dir}' "
 
@@ -557,7 +557,7 @@ def run_shell(gid,file_num,file_dir):
             print(text1)
             print("正在上传")
             print("----------------------")
-            client.send_message(text=f"{text1}", chat_id=int(Telegram_user_id))
+            client.send_message(text=f"{text1}", chat_id=message.chat.id)
 
 
           
@@ -595,7 +595,7 @@ def check_upload(api, gid):
 
 
 
-        t1 = threading.Thread(target=run_shell, args=(gid,file_num,file_dir))
+        t1 = threading.Thread(target=run_shell, args=(gid,file_num,file_dir,client, message))
         t1.start()
 
 
