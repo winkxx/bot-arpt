@@ -23,6 +23,10 @@ import nest_asyncio
 nest_asyncio.apply()
 os.system("df -lh")
 task=[]
+Telegram_bot_api=os.environ.get('Telegram_bot_api')
+Telegram_user_id=os.environ.get('Telegram_user_id')
+Api_hash=os.environ.get('Api_hash')
+Api_id=os.environ.get('Api_id')
 
 async def getpassword(iurl, password):
     global pheader, url
@@ -564,10 +568,7 @@ def run_shell(gid,file_num,file_dir,client, message):
  
 def upload_fankui(text):
     text_fankui=text
-    Telegram_bot_api=os.environ.get('Telegram_bot_api')
-    Telegram_user_id=os.environ.get('Telegram_user_id')
-    Api_hash=os.environ.get('Api_hash')
-    Api_id=os.environ.get('Api_id')
+
 
 
 client_fankui = Client("my_bot2", bot_token=Telegram_bot_api,
