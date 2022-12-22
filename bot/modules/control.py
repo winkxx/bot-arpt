@@ -550,14 +550,33 @@ def run_shell(gid,file_num,file_dir,client, message):
         ztai=subprocess.Popen.poll(cmd)
         if subprocess.Popen.poll(cmd) == 0:  # 判断子进程是否结束
             print("上传结束")
+            text1="上传结束"
+            upload_fankui(text1)
             return
         else:
-            
             print("----------------------")
             print(text1)
             print("正在上传")
             print("----------------------")
-            client.send_message(text=f"{text1}", chat_id=message.chat.id)
+            upload_fankui(text1)
+            
+            
+ 
+def upload_fankui(text):
+    text_fankui=text
+    Telegram_bot_api=os.environ.get('Telegram_bot_api')
+    Telegram_user_id=os.environ.get('Telegram_user_id')
+    Api_hash=os.environ.get('Api_hash')
+    Api_id=os.environ.get('Api_id')
+
+
+client_fankui = Client("my_bot2", bot_token=Telegram_bot_api,
+             api_hash=Api_hash, api_id=Api_id
+
+             )
+
+client_fankui.start()
+client.send_message(text=f"{text_fankui}", chat_id=int(Telegram_user_id))
 
 
           
@@ -595,7 +614,7 @@ def check_upload(api, gid):
 
 
 
-        t1 = threading.Thread(target=run_shell, args=(gid,file_num,file_dir,client, message))
+        t1 = threading.Thread(target=run_shell, args=(gid,file_num,file_dir))
         t1.start()
 
 
