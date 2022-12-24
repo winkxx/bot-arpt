@@ -542,7 +542,7 @@ async def odprivate_download(client, message):
         print(f"odprivate error {e}")
         await client.send_message(chat_id=message.chat.id, text=f"odprivate error {e}", parse_mode='markdown')
 
-def run_shell(gid,file_num,file_dir,client, message):
+def run_shell(gid,file_num,file_dir
     shell = f"bash upload.sh \"{gid}\" \"{file_num}\" '{file_dir}' "
     text1 = f"正在上传 \"{gid}\" \"{file_num}\" '{file_dir}' "
 
