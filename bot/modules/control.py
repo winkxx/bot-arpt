@@ -540,23 +540,7 @@ async def odprivate_download(client, message):
 
 def run_shell(gid,file_num,file_dir):
     shell = f"bash upload.sh \"{gid}\" \"{file_num}\" '{file_dir}' "
-    text1 = f"正在上传 \"{gid}\" \"{file_num}\" '{file_dir}' "
-    rc_url = f"https://root:{str(Aria2_secret)}@{App_title}-production.up.railway.app"
-    rcd_copyfile_url = f"{rc_url}/operations/copyfile"
-    drv, left = os.path.split(dir)
-    data = {
-            "srcFs": drv,
-            "srcRemote": left,
-            "dstFs": f"{Rclone_remote}:{Upload}",
-            "dstRemote": left,
-            "_async": True,
-        }
-     html = requests.post(url=rcd_copyfile_url, json=data)
-     result = html.json()
-
-     jobid = result["jobid"]
-
-     rcd_status_url = f"{rc_url}/job/status"   
+    text1 = f"正在上传 \"{gid}\" \"{file_num}\" '{file_dir}' " 
     print(shell)
     cmd = subprocess.Popen(shell, stdin=subprocess.PIPE, stderr=sys.stderr, close_fds=True,
                            stdout=subprocess.PIPE, universal_newlines=True, shell=True, bufsize=1)
@@ -572,33 +556,6 @@ def run_shell(gid,file_num,file_dir):
             print(text1)
             print("正在上传")
             print("----------------------")
-            while requests.post(url=rcd_status_url, json={"jobid": jobid}).json()['finished'] == False:
-                job_status = requests.post(url=f"{rc_url}/core/stats", json={"group": f"job/{jobid}"}).json()
-                print("--------------------------------")
-                print("rc反馈")
-                print(job_status)
-                print("--------------------------------")
-                if "transferring" in job_status:
-                    if job_status['transferring'][0]['eta'] == None:
-                        eta = "暂无"
-                        print("无任务")
-                    else:
-                        eta = cal_time(job_status['transferring'][0]['eta'])
-                        print(f"剩余时间:{eta}")
-                        rctext = f"任务ID:`{jobid}`\n" \
-                          f"任务名称:`{title}`\n" \
-                          f"传输部分:`{hum_convert(job_status['transferring'][0]['bytes'])}/{hum_convert(job_status['transferring'][0]['size'])}`\n" \
-                          f"传输进度:`{job_status['transferring'][0]['percentage']}%`\n" \
-                          f"传输速度:`{hum_convert(job_status['transferring'][0]['speed'])}/s`\n" \
-                          f"平均速度:`{hum_convert(job_status['transferring'][0]['speedAvg'])}/s`\n"
-                        print("-----------------------")
-                        print("基本信息")
-                        print(rctext)
-                        print("-----------------------")
-                else:
-                    print("-----------------------------------------")
-                    print("等待Rclone信息")
-                    print("-----------------------------------------")
 
 def check_upload(api, gid):
 
