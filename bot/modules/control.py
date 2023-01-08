@@ -23,10 +23,6 @@ import nest_asyncio
 nest_asyncio.apply()
 os.system("df -lh")
 task=[]
-Telegram_bot_api=os.environ.get('Telegram_bot_api')
-Telegram_user_id=os.environ.get('Telegram_user_id')
-Api_hash=os.environ.get('Api_hash')
-Api_id=os.environ.get('Api_id')
 
 async def getpassword(iurl, password):
     global pheader, url
@@ -545,7 +541,22 @@ async def odprivate_download(client, message):
 def run_shell(gid,file_num,file_dir):
     shell = f"bash upload.sh \"{gid}\" \"{file_num}\" '{file_dir}' "
     text1 = f"正在上传 \"{gid}\" \"{file_num}\" '{file_dir}' "
+    rc_url = f"https://root:{str(Aria2_secret)}@{App_title}-production.up.railway.app"
+    rcd_copyfile_url = f"{rc_url}/operations/copyfile"
+    drv, left = os.path.split(dir)
+    data = {
+            "srcFs": drv,
+            "srcRemote": left,
+            "dstFs": f"{Rclone_remote}:{Upload}",
+            "dstRemote": left,
+            "_async": True,
+        }
+     html = requests.post(url=rcd_copyfile_url, json=data)
+     result = html.json()
 
+     jobid = result["jobid"]
+
+     rcd_status_url = f"{rc_url}/job/status"   
     print(shell)
     cmd = subprocess.Popen(shell, stdin=subprocess.PIPE, stderr=sys.stderr, close_fds=True,
                            stdout=subprocess.PIPE, universal_newlines=True, shell=True, bufsize=1)
@@ -554,35 +565,40 @@ def run_shell(gid,file_num,file_dir):
         ztai=subprocess.Popen.poll(cmd)
         if subprocess.Popen.poll(cmd) == 0:  # 判断子进程是否结束
             print("上传结束")
-            text1="上传结束"
-            upload_fankui(text1)
             return
         else:
+            
             print("----------------------")
             print(text1)
             print("正在上传")
             print("----------------------")
-            upload_fankui(text1)
-            
-            
- 
-def upload_fankui(text):
-    text_fankui=text
-    client_fankui = Client("my_bot2", bot_token=Telegram_bot_api,
-             api_hash=Api_hash, api_id=Api_id
-
-             )
-    client_fankui.start()
-    client_fankui.send_message(text=f"{text_fankui}", chat_id=int(Telegram_user_id))
-
-
-
-
-
-
-
-
-          
+            while requests.post(url=rcd_status_url, json={"jobid": jobid}).json()['finished'] == False:
+                job_status = requests.post(url=f"{rc_url}/core/stats", json={"group": f"job/{jobid}"}).json()
+                print("--------------------------------")
+                print("rc反馈")
+                print(job_status)
+                print("--------------------------------")
+                if "transferring" in job_status:
+                    if job_status['transferring'][0]['eta'] == None:
+                        eta = "暂无"
+                        print("无任务")
+                    else:
+                        eta = cal_time(job_status['transferring'][0]['eta'])
+                        print(f"剩余时间:{eta}")
+                        rctext = f"任务ID:`{jobid}`\n" \
+                          f"任务名称:`{title}`\n" \
+                          f"传输部分:`{hum_convert(job_status['transferring'][0]['bytes'])}/{hum_convert(job_status['transferring'][0]['size'])}`\n" \
+                          f"传输进度:`{job_status['transferring'][0]['percentage']}%`\n" \
+                          f"传输速度:`{hum_convert(job_status['transferring'][0]['speed'])}/s`\n" \
+                          f"平均速度:`{hum_convert(job_status['transferring'][0]['speedAvg'])}/s`\n"
+                        print("-----------------------")
+                        print("基本信息")
+                        print(rctext)
+                        print("-----------------------")
+                else:
+                    print("-----------------------------------------")
+                    print("等待Rclone信息")
+                    print("-----------------------------------------")
 
 def check_upload(api, gid):
 
@@ -630,8 +646,7 @@ async def run_await_rclone(dir,title,info,file_num,client, message,gid):
     Upload=os.environ.get('Upload')
 
     rc_url = f"https://root:{str(Aria2_secret)}@{App_title}-production.up.railway.app"
-    info = await client.send_message(chat_id=message.chat.id, text="开始上传")
-    client.send_message(chat_id=message.chat.id, text=f"开始上传")
+    info = await client.send_message(chat_id=message.chat.id, text="开始上传", parse_mode='markdown')
     print(info)
     name=f"{str(info.message_id)}_{str(info.chat.id)}"
 
@@ -682,7 +697,7 @@ async def run_await_rclone(dir,title,info,file_num,client, message,gid):
                 print("-----------------------")
 
                 try:
-                    await client.edit_message_text(text=text, chat_id=info.chat.id)
+                    await client.edit_message_text(text=text, chat_id=info.chat.id, message_id=info.message_id)
                     print(text)
 
                 except:
@@ -801,18 +816,18 @@ def the_download(client, message,url):
     ]
 
     reply_markup = InlineKeyboardMarkup(inline_keyboard=inline_keyboard)
-    client.edit_message_text(text="排队中", chat_id=info.chat.id, reply_markup=reply_markup)
+    client.edit_message_text(text="排队中", chat_id=info.chat.id, message_id=info.message_id,reply_markup=reply_markup)
 
 
     temp_text=""
     while download.is_active:
         try:
             download.update()
-            print("正在下载源数据")
-            if temp_text!="正在下载源数据":
+            print("Downloading metadata")
+            if temp_text!="Downloading metadata":
                 try:
-                    client.edit_message_text(text="正在下载源数据",chat_id=info.chat.id,reply_markup=reply_markup)
-                    temp_text="正在下载源数据"
+                    client.edit_message_text(text="Downloading metadata",chat_id=info.chat.id,message_id=info.message_id,reply_markup=reply_markup)
+                    temp_text="Downloading metadata"
                 except:
                     None
             barop = progessbar(download.completed_length,download.total_length)
@@ -827,7 +842,7 @@ def the_download(client, message,url):
             if prevmessagemag != updateText:
                 print(updateText)
                 try:
-                    client.edit_message_text(text=updateText,chat_id=info.chat.id, reply_markup=reply_markup)
+                    client.edit_message_text(text=updateText,chat_id=info.chat.id,message_id=info.message_id, reply_markup=reply_markup)
                     prevmessagemag = updateText
                     print(updateText)
                 except:
@@ -839,12 +854,12 @@ def the_download(client, message,url):
                 download.update()
             except Exception as e:
                 if (str(e).endswith("is not found")):
-                    print("源数据删除/失败")
-                    print("源数据无法下载")
-                    if temp_text!="源数据删除/失败":
+                    print("Metadata Cancelled/Failed")
+                    print("Metadata couldn't be downloaded")
+                    if temp_text!="Metadata Cancelled/Failed":
                         try:
-                            client.edit_message_text(text="源数据删除/失败",chat_id=info.chat.id)
-                            temp_text="源数据删除/失败"
+                            client.edit_message_text(text="Metadata Cancelled/Failed",chat_id=info.chat.id,message_id=info.message_id)
+                            temp_text="Metadata Cancelled/Failed"
                         except:
                             None
                     return None
@@ -859,7 +874,7 @@ def the_download(client, message,url):
         if download.gid == match:
             currdownload = download
             break
-    print("下载完成")
+    print("Download complete")
 
     new_inline_keyboard = [
         [
@@ -880,7 +895,7 @@ def the_download(client, message,url):
 
     new_reply_markup = InlineKeyboardMarkup(inline_keyboard=new_inline_keyboard)
     try:
-        client.edit_message_text(text="下载完成", chat_id=info.chat.id, reply_markup=new_reply_markup)
+        client.edit_message_text(text="Download complete", chat_id=info.chat.id, message_id=info.message_id,reply_markup=new_reply_markup)
     except Exception as e:
         print(e)
 
@@ -892,22 +907,22 @@ def the_download(client, message,url):
             currdownload.update()
         except Exception as e:
             if (str(e).endswith("is not found")):
-                print("磁力异常")
-                print("磁力下载已经移除")
+                print("Magnet Deleted")
+                print("Magnet download was removed")
                 try:
-                    client.edit_message_text(text="磁力下载已经移除",chat_id=info.chat.id)
+                    client.edit_message_text(text="Magnet download was removed",chat_id=info.chat.id,message_id=info.message_id)
                 except:
                     None
                 break
             print(e)
-            print("磁力正在下载")
+            print("Issue in downloading!")
             continue
 
         if currdownload.status == 'removed':
             print("Magnet was cancelled")
             print("Magnet download was cancelled")
             try:
-                client.edit_message_text(text="Magnet download was cancelled",chat_id=info.chat.id)
+                client.edit_message_text(text="Magnet download was cancelled",chat_id=info.chat.id,message_id=info.message_id)
             except:
                 None
             break
@@ -917,7 +932,7 @@ def the_download(client, message,url):
             currdownload.remove(force=True, files=True)
             print("Magnet failed to resume/download!\nRun /cancel once and try again.")
             try:
-                client.edit_message_text(text="Magnet failed to resume/download!\nRun /cancel once and try again.",chat_id=info.chat.id,reply_markup=new_reply_markup)
+                client.edit_message_text(text="Magnet failed to resume/download!\nRun /cancel once and try again.",chat_id=info.chat.id,message_id=info.message_id,reply_markup=new_reply_markup)
             except:
                 None
             break
@@ -940,7 +955,7 @@ def the_download(client, message,url):
                 if prevmessage != updateText:
                     print(f"更新状态\n{updateText}")
                     try:
-                        client.edit_message_text(text=updateText,chat_id=info.chat.id,reply_markup=new_reply_markup)
+                        client.edit_message_text(text=updateText,chat_id=info.chat.id,message_id=info.message_id,reply_markup=new_reply_markup)
                         prevmessage = updateText
                     except:
                         None
@@ -967,7 +982,7 @@ def the_download(client, message,url):
                 if prevmessage != updateText:
                     print(f"更新状态\n{updateText}")
                     try:
-                        client.edit_message_text(text=updateText,chat_id=info.chat.id,reply_markup=new_reply_markup)
+                        client.edit_message_text(text=updateText,chat_id=info.chat.id,message_id=info.message_id,reply_markup=new_reply_markup)
                         prevmessage = updateText
                     except:
                         None
